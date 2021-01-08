@@ -4,12 +4,14 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
-@Getter @Setter(AccessLevel.PRIVATE)
+@Getter @Setter
+@Builder
 //TODO 연관관계가 복잡해질때 이퀄즈 해쉬코드에서 서로다른 연관관계를 순환 참조할수 있어 스택오버플로우가 발생할 수 있다.
 @EqualsAndHashCode(of = "id")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+//@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Account {
     @Id @GeneratedValue
     private Long id;
@@ -67,4 +69,8 @@ public class Account {
 
     //TODO 스터디 갱신정보를 웹으로 받을지 여부
     private boolean studyUpdatedByWeb;
+
+    public void generateEmailCheckToken() {
+        this.emailCheckToken = UUID.randomUUID().toString();
+    }
 }

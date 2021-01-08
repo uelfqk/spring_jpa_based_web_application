@@ -1,9 +1,11 @@
 package com.studyolle.config;
 
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.SecurityBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
@@ -23,6 +25,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .mvcMatchers(HttpMethod.GET, "/profile/*").permitAll()
                 //TODO 이외 나머지 설정들은 로그인을 해야만 사용할 수 있다.
                 .anyRequest().authenticated();
+    }
 
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        //TODO resources/static 에 있는 리소스들은 스프링 시큐리티를 적용하지 말라고 정의
+        web.ignoring()
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 }
