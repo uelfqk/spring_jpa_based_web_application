@@ -6,12 +6,18 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+//TODO 2021.01.10
+//     Spring Data Jpa 에서 findByEmail(String email); 을 정의해서 테스트 중
+//     no default constructor Exception 이 발생하여 엔티티 클래스 구조 변경
+//     @Builder 제거 -> @NoArgsConstructor(access = AccessLevel.PROTECTED) 추가
+//     public static Account createAccount(String nickname, String email, String password) 메소드 추가
+
 @Entity
 @Getter @Setter
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 //TODO 연관관계가 복잡해질때 이퀄즈 해쉬코드에서 서로다른 연관관계를 순환 참조할수 있어 스택오버플로우가 발생할 수 있다.
 @EqualsAndHashCode(of = "id")
-//@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString
 public class Account {
     @Id @GeneratedValue
     private Long id;
@@ -72,5 +78,16 @@ public class Account {
 
     public void generateEmailCheckToken() {
         this.emailCheckToken = UUID.randomUUID().toString();
+    }
+
+    public static Account createAccount(String nickname, String email, String password) {
+        Account account = new Account();
+        account.setNickname(nickname);
+        account.setEmail(email);
+        account.setPassword(password);
+        account.setStudyEnrollmentResultByWeb(true);
+        account.setStudyCreatedByWeb(true);
+        account.setStudyUpdatedByWeb(true);
+        return account;
     }
 }

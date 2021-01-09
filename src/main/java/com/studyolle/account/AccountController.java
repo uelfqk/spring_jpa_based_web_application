@@ -23,22 +23,22 @@ public class AccountController {
     private final SignUpFormValidator signUpFormValidator;
     private final AccountService accountService;
 
-    //TODO InitBinder 를 이용하여 value 로 지정한 이름에 해당하는 객체를
+    //TODO 2021.01.08 - 6.회원 가입 폼 서브밋 검증
+    //     InitBinder 를 이용하여 value 로 지정한 이름에 해당하는 객체를
     //     해당 객체를 받을때 303 검증 코드도 실행이 되고 Custom Validator 로 지정한 검증도 수행한다.
-    // 2021.01.08 - 5.회원 가입 폼 서브밋 검증
     @InitBinder("signUpForm")
     public void initBinder(WebDataBinder webDataBinder) {
         webDataBinder.addValidators(signUpFormValidator);
     }
 
-    //TODO 2021.01.08 - 5.회원 가입 폼 서브밋 검증
+    //TODO 2021.01.08 - 6.회원 가입 폼 서브밋 검증
     @GetMapping("/sign-up")
     public String newFrom(Model model) {
         model.addAttribute("signUpForm", new SignUpForm());
         return "account/sign-up";
     }
 
-    //TODO 2021.01.08 - 6.회원 가입 폼 서브밋 처리
+    //TODO 2021.01.08 - 7.회원 가입 폼 서브밋 처리
     @PostMapping("/sign-up")
     public String signUpSubmit(@Valid @ModelAttribute SignUpForm signUpForm, Errors errors) {
         //TODO JSR303 검증

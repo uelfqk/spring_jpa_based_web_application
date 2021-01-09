@@ -1,5 +1,6 @@
 package com.studyolle.account;
 
+import com.studyolle.domain.Account;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +9,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,6 +39,9 @@ class AccountControllerTest {
     @MockBean
     JavaMailSender javaMailSender;
 
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
     @Test
     @DisplayName("회원 가입 화면 보이는지 테스트")
     void signUpFormTest() throws Exception {
@@ -57,7 +65,7 @@ class AccountControllerTest {
                 .andExpect(model().attributeExists("signUpForm"));
     }
 
-    //TODO 2021.01.19 - 7.회원가입 리팩토링 및 테스트
+    //TODO 2021.01.09 - 8.회원가입 리팩토링 및 테스트
     //     status() 가 403 을 반환
     //     이유 : 스프링 시큐리티가 authorizeRequests 만 설정해놓은 상태
     //           CSRF (Cross-site Request Forgery) - 타 사이트에서 공격하는 사이트를 대상으로 폼 데이터를 보내는 것이다.
@@ -81,7 +89,7 @@ class AccountControllerTest {
 
     }
 
-    //TODO 2021.01.19 - 7.회원가입 리팩토링 및 테스트
+    //TODO 2021.01.09 - 8.회원가입 리팩토링 및 테스트
     @Test
     @DisplayName("회원 가입 처리 - 입력값 정상")
     void signUpSubmit_with_wrong_correct_test() throws Exception {
@@ -114,5 +122,46 @@ class AccountControllerTest {
         //     JavaMailSender 는 개발자가 인터페이스만 관리하고 외부의 서비스를 이용
         //     그렇기 때문에 Mock 객체를 이용해 테스트
        then(javaMailSender).should().send(any(SimpleMailMessage.class));
+    }
+
+    //TODO 2021.01.10 - 9.회원가입 패스워드 인코딩
+    //     bcrypt 알고리즘을 이용하여 입력된 평문을 해싱한 결과 테스트
+    @Test
+    @DisplayName("회원가입 - 비밀번호 인코딩 테스트")
+    void password_encode_test() throws Exception {
+        mockMvc.perform(post("/sign-up")
+                .param("nickname", "youngbin")
+                .param("email", "yb@email.com")
+                .param("password", "12345678")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection()) //TODO 상태 값이 리다이렉트
+                .andExpect(view().name("redirect:/")); //TODO 반환되는 URL
+
+        Account findAccount = accountRepository.findByEmail("yb@email.com");
+
+        assertThat(findAccount).isNotNull();
+        assertThat(findAccount.getPassword()).isNotEqualTo("12345678");
+    }
+
+    //TODO 2021.01.10 - 9.회원가입 패스워드 인코딩
+    //     입력받은 평문을 해싱하여 데이터베이스에 저장한 해시와 입력받은 평문 과 데이베이스의 해시값을 이용해
+    //     일치하는지 확인
+    @Test
+    @DisplayName("회원가입 - 비밀번호 인코딩 일치 테스트")
+    void password_encode_match_test() throws Exception {
+        mockMvc.perform(post("/sign-up")
+                .param("nickname", "youngbin")
+                .param("email", "yb@email.com")
+                .param("password", "12345678")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection()) //TODO 상태 값이 리다이렉트
+                .andExpect(view().name("redirect:/")); //TODO 반환되는 URL
+
+        Account findAccount = accountRepository.findByEmail("yb@email.com");
+
+        boolean mathPassword = passwordEncoder.matches( "12345678", findAccount.getPassword());
+
+        assertThat(findAccount).isNotNull();
+        assertThat(mathPassword).isTrue();
     }
 }
