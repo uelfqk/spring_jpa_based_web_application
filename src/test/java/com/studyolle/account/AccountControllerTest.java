@@ -57,7 +57,7 @@ class AccountControllerTest {
                 .andExpect(model().attributeExists("signUpForm"));
     }
 
-    //TODO 21.01.19 - 회원가입 리팩토링 및 테스트
+    //TODO 2021.01.19 - 7.회원가입 리팩토링 및 테스트
     //     status() 가 403 을 반환
     //     이유 : 스프링 시큐리티가 authorizeRequests 만 설정해놓은 상태
     //           CSRF (Cross-site Request Forgery) - 타 사이트에서 공격하는 사이트를 대상으로 폼 데이터를 보내는 것이다.
@@ -81,7 +81,7 @@ class AccountControllerTest {
 
     }
 
-    //TODO 21.01.19 - 회원가입 리팩토링 및 테스트
+    //TODO 2021.01.19 - 7.회원가입 리팩토링 및 테스트
     @Test
     @DisplayName("회원 가입 처리 - 입력값 정상")
     void signUpSubmit_with_wrong_correct_test() throws Exception {
