@@ -2,7 +2,6 @@ package com.studyolle.account;
 
 import com.studyolle.account.dto.SignUpForm;
 import com.studyolle.domain.Account;
-import com.studyolle.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -33,12 +32,14 @@ public class AccountController {
         webDataBinder.addValidators(signUpFormValidator);
     }
 
+    //TODO 2021.01.08 - 회원 가입 폼 서브밋 검증
     @GetMapping("/sign-up")
     public String newFrom(Model model) {
         model.addAttribute("signUpForm", new SignUpForm());
         return "account/sign-up";
     }
 
+    //TODO 2021.01.08 - 회원 가입 폼 서브밋 처리
     @PostMapping("/sign-up")
     public String signUpSubmit(@Valid @ModelAttribute SignUpForm signUpForm, Errors errors) {
         //TODO JSR303 검증
