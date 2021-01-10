@@ -77,11 +77,7 @@ public class AccountController {
             return viewName;
         }
 
-        //TODO 브라우저에서 전송한 내용에 이상이 없는 경우
-        //     이메일 인증 처리
-        //     가입일시를 현재시간으로 변경
-        account.setEmailVerified(true);
-        account.setJoinedAt(LocalDateTime.now());
+        account.completeSignUp();
 
         //TODO View 에 출력할 내용을 model 에 담아 전달
         //     이메일을 확인했습니다. *{n} 번째 회원, *{nickname} 님 가입을 축하합니다.

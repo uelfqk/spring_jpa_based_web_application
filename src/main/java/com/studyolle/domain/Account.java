@@ -17,7 +17,6 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 //TODO 연관관계가 복잡해질때 이퀄즈 해쉬코드에서 서로다른 연관관계를 순환 참조할수 있어 스택오버플로우가 발생할 수 있다.
 @EqualsAndHashCode(of = "id")
-@ToString
 public class Account {
     @Id @GeneratedValue
     private Long id;
@@ -89,5 +88,26 @@ public class Account {
         account.setStudyCreatedByWeb(true);
         account.setStudyUpdatedByWeb(true);
         return account;
+    }
+
+    //TODO 2021.01.10 - 10.회원가입 인증 메일 확인
+    //     Controller 가 아닌 엔티티 클래스에서 처리하도록 리팩토링
+    //     엔티티 클래스로 옮겨오면서 응집도 향상
+    public void completeSignUp() {
+        //TODO 브라우저에서 전송한 내용에 이상이 없는 경우
+        //     이메일 인증 처리
+        //     가입일시를 현재시간으로 변경
+        this.emailVerified = true;
+        this.joinedAt = LocalDateTime.now();
+    }
+
+    @Override
+    public String toString() {
+        return "Account{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", nickname='" + nickname + '\'' +
+                ", password='" + password + '\'' +
+                '}';
     }
 }

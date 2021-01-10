@@ -1,6 +1,7 @@
 package com.studyolle.account;
 
 import com.studyolle.domain.Account;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +13,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -94,8 +93,8 @@ class AccountControllerTest {
     @DisplayName("회원 가입 처리 - 입력값 정상")
     void signUpSubmit_with_wrong_correct_test() throws Exception {
         MvcResult result = mockMvc.perform(post("/sign-up")
-                .param("nickname", "youngbin")
-                .param("email", "yb@email.com")
+                .param("nickname", "youngbin1")
+                .param("email", "yb1@email.com")
                 .param("password", "12345678")
                 .with(csrf()))
                 .andExpect(status().is3xxRedirection()) //TODO 상태 값이 리다이렉트
@@ -130,14 +129,14 @@ class AccountControllerTest {
     @DisplayName("회원가입 - 비밀번호 인코딩 테스트")
     void password_encode_test() throws Exception {
         mockMvc.perform(post("/sign-up")
-                .param("nickname", "youngbin")
-                .param("email", "yb@email.com")
+                .param("nickname", "youngbin2")
+                .param("email", "yb2@email.com")
                 .param("password", "12345678")
                 .with(csrf()))
                 .andExpect(status().is3xxRedirection()) //TODO 상태 값이 리다이렉트
                 .andExpect(view().name("redirect:/")); //TODO 반환되는 URL
 
-        Account findAccount = accountRepository.findByEmail("yb@email.com");
+        Account findAccount = accountRepository.findByEmail("yb2@email.com");
 
         assertThat(findAccount).isNotNull();
         assertThat(findAccount.getPassword()).isNotEqualTo("12345678");
@@ -150,14 +149,14 @@ class AccountControllerTest {
     @DisplayName("회원가입 - 비밀번호 인코딩 일치 테스트")
     void password_encode_match_test() throws Exception {
         mockMvc.perform(post("/sign-up")
-                .param("nickname", "youngbin")
-                .param("email", "yb@email.com")
+                .param("nickname", "youngbin3")
+                .param("email", "yb3@email.com")
                 .param("password", "12345678")
                 .with(csrf()))
                 .andExpect(status().is3xxRedirection()) //TODO 상태 값이 리다이렉트
                 .andExpect(view().name("redirect:/")); //TODO 반환되는 URL
 
-        Account findAccount = accountRepository.findByEmail("yb@email.com");
+        Account findAccount = accountRepository.findByEmail("yb3@email.com");
 
         boolean mathPassword = passwordEncoder.matches( "12345678", findAccount.getPassword());
 
@@ -171,16 +170,60 @@ class AccountControllerTest {
     @DisplayName("회원가입 - 이메일 발송 토큰 발행 테스트")
     void signUp_generate_email_token_test() throws Exception {
         mockMvc.perform(post("/sign-up")
-                .param("nickname", "youngbin")
-                .param("email", "yb@email.com")
+                .param("nickname", "youngbin4")
+                .param("email", "yb4@email.com")
                 .param("password", "12345678")
                 .with(csrf()))
                 .andExpect(status().is3xxRedirection()) //TODO 상태 값이 리다이렉트
                 .andExpect(view().name("redirect:/")); //TODO 반환되는 URL
 
-        Account findAccount = accountRepository.findByEmail("yb@email.com");
+        Account findAccount = accountRepository.findByEmail("yb4@email.com");
 
         assertThat(findAccount).isNotNull();
         assertThat(findAccount.getEmailCheckToken()).isNotNull();
+    }
+
+    //TODO 2021.01.10 - 11.회원가입 인증 메일 확인 테스트 및 리팩토링
+    //     인증 메일 확인 테스트 - 입력값이 잘못된 경우
+    //      -. error 프로퍼티가 model 에 있는지 확인 -------- model().attributeExists("error")
+    //      -. view 이름이 account/checked-email 인지 확인
+    @Test
+    @DisplayName("회원가입 - 인증 메일 확인 - 입력값 오류")
+    void 회원가입_인증_메일_확인_입력값_오류() throws Exception {
+        String requestUrl = "/check-email-token?" +
+                "token=asdqravv" +
+                "&email=email@email.com";
+
+        mockMvc.perform(get(requestUrl))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("error"))
+                .andExpect(view().name("account/checked-email"));
+    }
+
+    //TODO 2021.01.10 - 11.회원가입 인증 메일 확인 테스트 및 리팩토링
+    //     인증 메일 확인 테스트 - 입력값이 정상인 경우
+    //      -. model 에 error 가 없는지 확인 --------------- model().attributeDoesNotExist("error")
+    //      -. model 에 numberOfUser 가 있는지 확인 -------- model().attributeExists("numberOfUser")
+    //      -. model 에 nickname 이 있는지 확인 ------------ model().attributeExists("nickname")
+    //      -. view 이름이 account/checked-email 인지 확인
+    @Test
+    @DisplayName("회원가입 - 인증 메일 확인 - 입력값이 졍상")
+    @Transactional
+    void 회원가입_인증_메일_확인_입력값_정상() throws Exception {
+        Account account = Account.createAccount("youngbin5", "yb5@email", "12345678");
+        Account newAccount = accountRepository.save(account);
+        newAccount.generateEmailCheckToken();
+
+        String requestUrl = "/check-email-token?" +
+                "token=" + newAccount.getEmailCheckToken() +
+                "&email=" + newAccount.getEmail();
+
+        mockMvc.perform(get(requestUrl)
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeDoesNotExist("error"))
+                .andExpect(model().attributeExists("numberOfUser"))
+                .andExpect(model().attributeExists("nickname"))
+                .andExpect(view().name("account/checked-email"));
     }
 }
