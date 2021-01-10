@@ -164,4 +164,23 @@ class AccountControllerTest {
         assertThat(findAccount).isNotNull();
         assertThat(mathPassword).isTrue();
     }
+
+    //TODO 2021.01.10 - 10.회원가입 인증 메일 확인
+    //     회원가입 처리시 이메일 발송을 위한 토큰 발행 테스트
+    @Test
+    @DisplayName("회원가입 - 이메일 발송 토큰 발행 테스트")
+    void signUp_generate_email_token_test() throws Exception {
+        mockMvc.perform(post("/sign-up")
+                .param("nickname", "youngbin")
+                .param("email", "yb@email.com")
+                .param("password", "12345678")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection()) //TODO 상태 값이 리다이렉트
+                .andExpect(view().name("redirect:/")); //TODO 반환되는 URL
+
+        Account findAccount = accountRepository.findByEmail("yb@email.com");
+
+        assertThat(findAccount).isNotNull();
+        assertThat(findAccount.getEmailCheckToken()).isNotNull();
+    }
 }
