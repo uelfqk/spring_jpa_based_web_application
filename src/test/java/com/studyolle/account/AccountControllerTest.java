@@ -19,11 +19,32 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 //TODO 컨트롤러부터 아래 모든 클래스 테스트
+
+//TODO 2021.01.11 12.회원가입 가입 완료 후 자동 로그인
+//     스프링 시큐리티를 사용하면 스프링 부트가 자동으로 MockMvc 에
+//     스프링 시큐리티 기능을 추가적으로 지원
+//     지원 종류 : csrf()
+//               authenticated() --- 인증이 된 사용자인지 확인
+//               unauthenticated() - 인증이 되지 않은 사용자인지 확인
+// ----------------------------------------------------------------------------------
+//    테스트 수정 : 회원가입 성공(입력값 정상) 테스트에 andExpect(authenticated()); 추가
+//                 signUpSubmit_with_wrong_correct_test()
+//                 password_encode_test()
+//                 password_encode_match_test()
+//                 signUp_generate_email_token_test()
+//                 회원가입_인증_메일_확인_입력값_정상()
+// ----------------------------------------------------------------------------------
+//                 회원가입 실패(입력값 오류) 테스트에 andExpect(unauthenticated()); 추가
+//                 signUpSubmit_with_wrong_input_Test()
+//                 회원가입_인증_메일_확인_입력값_오류()
+// ----------------------------------------------------------------------------------
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -84,8 +105,8 @@ class AccountControllerTest {
             .param("password", "12345")
             .with(csrf())) //TODO 적용 : 보내는 요청에 " with(csrf()) " 포함하여 전송 > 테스트 코드일때
             .andExpect(status().isOk())
-            .andExpect(view().name("account/sign-up"));
-
+            .andExpect(view().name("account/sign-up"))
+            .andExpect(unauthenticated());
     }
 
     //TODO 2021.01.09 - 8.회원가입 리팩토링 및 테스트
@@ -99,6 +120,7 @@ class AccountControllerTest {
                 .with(csrf()))
                 .andExpect(status().is3xxRedirection()) //TODO 상태 값이 리다이렉트
                 .andExpect(view().name("redirect:/")) //TODO 반환되는 URL
+                .andExpect(authenticated())
                 .andReturn();
 
         //TODO 요청에 매개변수 얻기 - nickname
@@ -134,7 +156,8 @@ class AccountControllerTest {
                 .param("password", "12345678")
                 .with(csrf()))
                 .andExpect(status().is3xxRedirection()) //TODO 상태 값이 리다이렉트
-                .andExpect(view().name("redirect:/")); //TODO 반환되는 URL
+                .andExpect(view().name("redirect:/")) //TODO 반환되는 URL
+                .andExpect(authenticated());
 
         Account findAccount = accountRepository.findByEmail("yb2@email.com");
 
@@ -154,7 +177,8 @@ class AccountControllerTest {
                 .param("password", "12345678")
                 .with(csrf()))
                 .andExpect(status().is3xxRedirection()) //TODO 상태 값이 리다이렉트
-                .andExpect(view().name("redirect:/")); //TODO 반환되는 URL
+                .andExpect(view().name("redirect:/")) //TODO 반환되는 URL
+                .andExpect(authenticated());
 
         Account findAccount = accountRepository.findByEmail("yb3@email.com");
 
@@ -175,7 +199,8 @@ class AccountControllerTest {
                 .param("password", "12345678")
                 .with(csrf()))
                 .andExpect(status().is3xxRedirection()) //TODO 상태 값이 리다이렉트
-                .andExpect(view().name("redirect:/")); //TODO 반환되는 URL
+                .andExpect(view().name("redirect:/")) //TODO 반환되는 URL
+                .andExpect(authenticated());
 
         Account findAccount = accountRepository.findByEmail("yb4@email.com");
 
@@ -197,7 +222,8 @@ class AccountControllerTest {
         mockMvc.perform(get(requestUrl))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("error"))
-                .andExpect(view().name("account/checked-email"));
+                .andExpect(view().name("account/checked-email"))
+                .andExpect(unauthenticated());
     }
 
     //TODO 2021.01.10 - 11.회원가입 인증 메일 확인 테스트 및 리팩토링
@@ -224,6 +250,7 @@ class AccountControllerTest {
                 .andExpect(model().attributeDoesNotExist("error"))
                 .andExpect(model().attributeExists("numberOfUser"))
                 .andExpect(model().attributeExists("nickname"))
-                .andExpect(view().name("account/checked-email"));
+                .andExpect(view().name("account/checked-email"))
+                .andExpect(authenticated());
     }
 }

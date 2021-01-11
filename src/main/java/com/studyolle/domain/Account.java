@@ -90,7 +90,7 @@ public class Account {
         return account;
     }
 
-    //TODO 2021.01.10 - 10.회원가입 인증 메일 확인
+    //TODO 2021.01.10 - 11.회원가입 인증 메일 확인 테스트 및 리팩토링
     //     Controller 가 아닌 엔티티 클래스에서 처리하도록 리팩토링
     //     엔티티 클래스로 옮겨오면서 응집도 향상
     public void completeSignUp() {
@@ -99,6 +99,15 @@ public class Account {
         //     가입일시를 현재시간으로 변경
         this.emailVerified = true;
         this.joinedAt = LocalDateTime.now();
+    }
+
+    //TODO 2021.01.10 - 12.회원가입 가입완료 후 자동로그인
+    //     리팩토링
+    //     AccountController 에서 조건문을 읽기 힘듦으로 도메인으로 가져와
+    //     폼으로부터 넘어온 매개변수를 비교하여 boolean 값으로 반환
+    //     도메인 객체 응집도 향상
+    public boolean isValidEmailToken(String token) {
+        return emailCheckToken.equals(token) == false;
     }
 
     @Override

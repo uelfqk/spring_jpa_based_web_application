@@ -46,8 +46,8 @@ public class AccountController {
             return "account/sign-up";
         }
 
-        accountService.processNewAccount(signUpForm);
-
+        Account account = accountService.processNewAccount(signUpForm);
+        accountService.login(account);
         //TODO 회원 가입 처리
         return "redirect:/";
     }
@@ -72,13 +72,13 @@ public class AccountController {
 
         //TODO 이메일을 발송할때 발행한 토큰과 브라우저에서 전송한 토큰이 다르면
         //     토큰이 잘못되었다는 의미
-        if(account.getEmailCheckToken().equals(token) == false) {
+        if(account.isValidEmailToken(token)) {
             model.addAttribute("error", "wrong.token");
             return viewName;
         }
 
         account.completeSignUp();
-
+        accountService.login(account);
         //TODO View 에 출력할 내용을 model 에 담아 전달
         //     이메일을 확인했습니다. *{n} 번째 회원, *{nickname} 님 가입을 축하합니다.
         model.addAttribute("numberOfUser", accountRepository.count());
