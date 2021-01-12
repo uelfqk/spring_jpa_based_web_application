@@ -5,11 +5,8 @@ import com.studyolle.domain.Account;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -59,12 +56,11 @@ public class AccountService {
     //     리팩토링 : 회원가입을 담당하는 기능을 추출하여 메소드로 분리
     //     Controller Layer 에서 알고있지 않아도 됨으로 private 접근제 어자로 비공개
     private Account saveNewAccount(SignUpForm signUpForm) {
-        Account account = Account.createAccount(signUpForm.getNickname(), signUpForm.getEmail(),
-                passwordEncoder.encode(signUpForm.getPassword()));
+        Account account = Account.createAccount(signUpForm.getNickname(),
+                signUpForm.getEmail(), passwordEncoder.encode(signUpForm.getPassword()));
 
         //TODO 뷰에서 받은 데이터 저장
         Account newAccount = accountRepository.save(account);
-
         return newAccount;
     }
 

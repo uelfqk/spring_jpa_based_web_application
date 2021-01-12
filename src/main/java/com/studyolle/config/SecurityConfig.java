@@ -19,8 +19,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 //TODO 아래 요청들은 GET, POST 요청에 대해서 인증 과정을 거치지 않고 페이지 요청 허용
-                .mvcMatchers("/", "/login", "/sign-up", "/check-email", "/check-email-token",
-                        "/email-login", "/check-email-login", "/login-link").permitAll()
+                .mvcMatchers("/", "/login", "/sign-up", "/check-email",
+                        "/check-email-token", "/email-login", "/check-email-login",
+                        "/login-link").permitAll()
                 //TODO 프로필 요청의 경우 GET 요청에서만 허용
                 .mvcMatchers(HttpMethod.GET, "/profile/*").permitAll()
                 //TODO 이외 나머지 설정들은 로그인을 해야만 사용할 수 있다.
@@ -30,7 +31,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         //TODO resources/static 에 있는 리소스들은 스프링 시큐리티를 적용하지 말라고 정의
+        //     흔히 사용하는 staticResources 경로 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+        //
+        //     2021.01.12 14.프론트엔드 라이브러리 설정
+        //     npm 으로 bootstrap 을 다운 받고 html 파일 수정
+        //     스프링 시큐리티에 추가적으로 /node_modules/** 를 추가하여 js, css 등의 파일은 
+        //     걸러지지 않게 수정 - .mvcMatchers("/node_modules/**")
         web.ignoring()
+                .mvcMatchers("/node_modules/**")
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 }
