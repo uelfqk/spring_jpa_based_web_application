@@ -67,7 +67,7 @@ public class AccountService {
     //TODO 2021.01.09 - 8.회원가입 리팩토링 및 테스트
     //     리팩토링 : 이메일 전송을 담당하는 기능을 추출하여 메소드로 분리
     //     Controller Layer 에서 알고있지 않아도 됨으로 private 접근제어자로 비공개
-    private void sendSignUpConfirmEmail(Account newAccount) {
+    public void sendSignUpConfirmEmail(Account newAccount) {
         //TODO 이메일 전송
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(newAccount.getEmail()); //TODO 이메일을 받을 사람
@@ -79,26 +79,31 @@ public class AccountService {
     }
 
     //TODO 2021.01.11 12.회원가입 가입 완료 후 자동 로그인
-    //     자동 로그인 비즈니스 로직
+    //     1. 자동 로그인 비즈니스 로직
+    // --------------------------------------------------------------------------------------------
+    //     2021.01.13 17.현재 인증된 사용자 정보 참조
+    //     1. 인증 토큰 발행 첫째 매개변수가 principal 정보
+    //     2. 기존 인증 토큰을 발행할때 기존 account.getNickname() -> new UserAccount(account) 로 변경
+    //     3. 스프링 시큐리티와 도메인의 Account 정보를 연동한 어뎁터 객체를 principal 로 사용
     public void login(Account account) {
         //TODO 2021.01.11 12.회원가입 가입 완료 후 자동 로그인
-        //     본래는 AuthenticationManager 가 하는 일을 비즈니스 로직에서 구현
-        //     결과는 동일
-        //     이와 같이 사용하는 이유는 아래 정석적으로 인증하는 방법에 명시
+        //     1. 본래는 AuthenticationManager 가 하는 일을 비즈니스 로직에서 구현 - 결과는 동일
+        //     2. 이와 같이 사용하는 이유는 아래 정석적으로 인증하는 방법에 명시
         List<SimpleGrantedAuthority> authorities = new ArrayList<>(Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")));
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                account.getNickname(),
+                new UserAccount(account),
+                //account.getNickname(),
                 account.getPassword(),
                 authorities);
         SecurityContextHolder.getContext().setAuthentication(token);
 
         //TODO 2021.01.11 12.회원가입 가입 완료 후 자동 로그인
-        //     정석적으로 인증하는 방법
-        //     AuthenticationManager 사용
-        //     폼에서 받은 데이터를 넣어 인증된 객체를 토큰에 넣어줘야된다.
-        //     정석적으로 인증하는 방법을 사용하지 못하는 이유 :
-        //          password 를 평문으로 입력해야하는데 데이터베이스에 password 를 평문으로 저장하지 않는다.
-        //          웹 브라우저에서 password 평문을 받는 경우도 있지만 그렇지 않는 경우도 있기 때문에 사용 불가능
+        //     1. 정석적으로 인증하는 방법
+        //      1). AuthenticationManager 사용
+        //      2). 폼에서 받은 데이터를 넣어 인증된 객체를 토큰에 넣어줘야된다.
+        //     2. 정석적으로 인증하는 방법을 사용하지 못하는 이유 :
+        //      1). password 를 평문으로 입력해야하는데 데이터베이스에 password 를 평문으로 저장하지 않는다.
+        //      2). 웹 브라우저에서 password 평문을 받는 경우도 있지만 그렇지 않는 경우도 있기 때문에 사용 불가능
 //        UsernamePasswordAuthenticationToken token = UsernamePasswordAuthenticationToken(
 //                username, password);
 //        Authentication authenticate = authenticationManager.authenticate(token);

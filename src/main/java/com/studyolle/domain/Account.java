@@ -75,8 +75,14 @@ public class Account {
     //TODO 스터디 갱신정보를 웹으로 받을지 여부
     private boolean studyUpdatedByWeb;
 
+    //TODO 2021.01.13 16.가입확인 이메일 재전송
+    //     이메일 전송 토큰 생성 시간
+    //     이메일 토큰을 생성할때 현재시간을 삽입
+    private LocalDateTime emailCheckTokenGeneratedAt;
+
     public void generateEmailCheckToken() {
         this.emailCheckToken = UUID.randomUUID().toString();
+        this.emailCheckTokenGeneratedAt = LocalDateTime.now();
     }
 
     public static Account createAccount(String nickname, String email, String password) {
@@ -108,6 +114,14 @@ public class Account {
     //     도메인 객체 응집도 향상
     public boolean isValidEmailToken(String token) {
         return emailCheckToken.equals(token) == false;
+    }
+
+    //TODO 2021.01.13 16.가입확인 이메일 재전송
+    //     인증 이메일 재전송 주기를 1시간으로 설정하기 위하여 검증하는 로직
+    //     현재 시간에서 1시간을 뺀 값이 토큰 생성시간 이후인지 확인
+    //     before : false / after : true
+    public boolean canSendConfirmEmail() {
+        return this.emailCheckTokenGeneratedAt.isBefore(LocalDateTime.now().minusHours(1));
     }
 
     @Override

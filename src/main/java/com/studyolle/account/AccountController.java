@@ -20,7 +20,6 @@ public class AccountController {
 
     private final SignUpFormValidator signUpFormValidator;
     private final AccountService accountService;
-
     private final AccountRepository accountRepository;
 
     //TODO 2021.01.08 - 6.회원 가입 폼 서브밋 검증
@@ -84,5 +83,32 @@ public class AccountController {
         model.addAttribute("numberOfUser", accountRepository.count());
         model.addAttribute("nickname", account.getNickname());
         return viewName;
+    }
+
+    //TODO 2021.01.13 16.가입확인 이메일 재전송
+    //     1. 인증하지 않은 경우 계정 인증 이메일을 확인하세요. 클릭시
+    //     2. 인증된 사용자 정보를 참조하여 화면 변경
+    @GetMapping("/check-email")
+    public String checkEmail(@CurrentUser Account account, Model model) {
+        model.addAttribute("email", account.getEmail());
+        return "account/check-email";
+    }
+
+    //TODO 2021.01.13 16.가입확인 이메일 재전송
+    //     1. 인증 이메일 재전송은 현재시간에서 1시간 뺀 시간과 이메일 전송 토큰을 생성한 시간과 비교하여
+    //     2. 1시간마다 재전송 하는 이유
+    //      1). 의도적으로 이메일을 계속 전송하여 서비스를 망가트릴 가능성이 있기때문에 이와같은 제약조건 설정
+    //     3. 결과가 true 이면 이메일 재전송 - 리다렉트 사용 ( 새로고침으로 인해 이메일이 계속 전송될 수 있기때문에 )
+    //              false 이면 error 정보를 담아 화면 전환
+    @GetMapping("/resend-confirm-email")
+    public String reSendEmail(@CurrentUser Account account, Model model) {
+        if(!account.canSendConfirmEmail()) {
+            model.addAttribute("error", "인증 이메일은 1시간에 한번만 전송할 수 있습니다.");
+            model.addAttribute("email", account.getEmail());
+            return "account/check-email";
+        }
+
+        accountService.sendSignUpConfirmEmail(account);
+        return "redirect:/";
     }
 }
