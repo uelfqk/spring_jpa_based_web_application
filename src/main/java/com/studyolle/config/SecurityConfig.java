@@ -30,6 +30,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .mvcMatchers(HttpMethod.GET, "/profile/*").permitAll()
                 //TODO 이외 나머지 설정들은 로그인을 해야만 사용할 수 있다.
                 .anyRequest().authenticated();
+
+        //TODO 2021.01.14 로그인 / 로그아웃
+        //     1. 스프링 시큐리티가 사용하는 로그인 폼을 개발자가 만든 로그인 폼으로
+        //        사용하도록 설정
+        http.formLogin()
+                .loginPage("/login").permitAll();
+
+        //TODO 2021.01.14 로그인 / 로그아웃
+        //     1. 로그아웃 했을때 화면을 메인화면 ( templates/index.html ) 로 이동하도록 설정
+        http.logout()
+                .logoutSuccessUrl("/");
     }
 
     @Override

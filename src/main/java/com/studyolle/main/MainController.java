@@ -20,4 +20,11 @@ public class MainController {
 
         return "index";
     }
+
+    //TODO 2021.01.14 로그인 / 로그아웃
+    //     1. 로그인 페이지로 전환하는 핸들러
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
 }

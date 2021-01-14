@@ -28,7 +28,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class AccountService {
+public class AccountService implements UserDetailsService {
     //TODO 2021.01.09 - 8.회원가입 리팩토링 및 테스트
     //     기존 Controller 에서 사용하는 의존성을 Service Layer 로 이동
     //     Controller 의 의존성을 AccountService 만을 받게 변경
@@ -115,5 +115,28 @@ public class AccountService {
 
     }
 
+    //TODO 2021.01.14 로그인 / 로그아웃
+    //     1. 로그인할때 인증할때 데이터베이스에 있는 데이터를 기반으로 데이터를 처리해야하기 때문에
+    //        UserDetailsService implements 하고
+    //        public UserDetails loadUserByUsername(String emailOrNickname) throws UsernameNotFoundException 구현
+    //     2. 로직
+    //      1). 입력받은 emailOrNickname ( 현재 프로젝트에서 로그인할때 사용하는 value )
+    //      2). 데이터베이스에서 emailOrNickname 으로 유저 정보를 검색
+    //       -. 이메일로 조회하고 해당 유저 정보가 없다면
+    //        >. 닉네임으로 조회
+    //         /. 조회된 정보가 없다면 -> throw new UsernameNotFoundException(emailOrNickname) 반환
+    //         /. 조회된 정보가 있다면 principal 반환 -> return new UserAccount(account)
+    @Override
+    public UserDetails loadUserByUsername(String emailOrNickname) throws UsernameNotFoundException {
+        Account account = accountRepository.findByEmail(emailOrNickname);
+        if(account == null) {
+            account = accountRepository.findByNickname(emailOrNickname);
+        }
 
+        if(account == null) {
+            throw new UsernameNotFoundException(emailOrNickname);
+        }
+
+        return new UserAccount(account);
+    }
 }
