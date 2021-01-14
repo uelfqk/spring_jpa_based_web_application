@@ -1,5 +1,6 @@
 package com.studyolle.account;
 
+import com.studyolle.account.dto.SignUpForm;
 import com.studyolle.domain.Account;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -61,6 +62,9 @@ class AccountControllerTest {
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    AccountService accountService;
 
     @Test
     @DisplayName("회원 가입 화면 보이는지 테스트")
@@ -251,6 +255,56 @@ class AccountControllerTest {
                 .andExpect(model().attributeExists("numberOfUser"))
                 .andExpect(model().attributeExists("nickname"))
                 .andExpect(view().name("account/checked-email"))
+                .andExpect(authenticated());
+    }
+
+
+    //TODO 2021.01.13 18.가입 이메일 재전송
+    //     1. 테스트 항목
+    //      1). Http Status Code 200 인지
+    //      2). view 이름이 account/check-email 인지
+    //      3). model 객체에 error 가 없는지
+    //      4). 인증이 되었는지
+    @Test
+    @DisplayName("계정 인증 이메일 확인")
+    void 계정_인증_이메일_확인() throws Exception {
+        SignUpForm signUpForm = new SignUpForm();
+        signUpForm.setNickname("123124");
+        signUpForm.setEmail("email@email.com");
+        signUpForm.setPassword("1111111111");
+
+        Account account = accountService.processNewAccount(signUpForm);
+        accountService.login(account);
+
+        mockMvc.perform(get("/check-email"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("account/check-email"))
+                .andExpect(model().attributeExists("email"))
+                .andExpect(authenticated());
+    }
+
+    //TODO 2021.01.13 18.가입 이메일 재전송
+    //     1. 테스트 항목
+    //      1). Http Status Code 200 인지
+    //      2). view 이름이 account/check-email 인지
+    //      3). model 객체에 error 가 있는지
+    //       -. 이메일 전송 토큰을 발행하고 1시간이 지나지 않았기 때문에 model 에 error 를 가지고 있어야함
+    //      4). 인증이 되었는지
+    @Test
+    @DisplayName("이메일 재전송")
+    void 이메일_재전송() throws Exception {
+        SignUpForm signUpForm = new SignUpForm();
+        signUpForm.setNickname("123124");
+        signUpForm.setEmail("email@email.com");
+        signUpForm.setPassword("1111111111");
+
+        Account account = accountService.processNewAccount(signUpForm);
+        accountService.login(account);
+
+        mockMvc.perform(get("/resend-confirm-email"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("account/check-email"))
+                .andExpect(model().attributeExists("error"))
                 .andExpect(authenticated());
     }
 }

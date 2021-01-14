@@ -119,7 +119,7 @@ public class Account {
     //TODO 2021.01.13 16.가입확인 이메일 재전송
     //     인증 이메일 재전송 주기를 1시간으로 설정하기 위하여 검증하는 로직
     //     현재 시간에서 1시간을 뺀 값이 토큰 생성시간 이후인지 확인
-    //     before : false / after : true
+    //     before : true / after : false
     public boolean canSendConfirmEmail() {
         return this.emailCheckTokenGeneratedAt.isBefore(LocalDateTime.now().minusHours(1));
     }
