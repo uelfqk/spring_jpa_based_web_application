@@ -76,8 +76,7 @@ public class AccountController {
             return viewName;
         }
 
-        account.completeSignUp();
-        accountService.login(account);
+        accountService.completeSignUp(account);
         //TODO View 에 출력할 내용을 model 에 담아 전달
         //     이메일을 확인했습니다. *{n} 번째 회원, *{nickname} 님 가입을 축하합니다.
         model.addAttribute("numberOfUser", accountRepository.count());
@@ -110,5 +109,27 @@ public class AccountController {
 
         accountService.sendSignUpConfirmEmail(account);
         return "redirect:/";
+    }
+
+    //TODO 2021.01.15 22.프로필 뷰
+    //     1. 프로필 뷰에 접근하는 핸들러
+    //     2. 프로필 정보가 있을때와 없을때 보여줄 메시지가 다름
+    //     3. 현재 유자가 프로필을 수정할 수 있는 권한이 있는지 판단 필요
+    @GetMapping("/profile/{nickname}")
+    public String viewProfile(@PathVariable String nickname, Model model,
+                              @CurrentUser Account account) {
+        //TODO 1. 현재 인증된 정보 principal ( @CurrentUser Account account ) 을 이용해
+        //        Url path 의 nickname 으로 해당 유저 조회
+        //     2. 해당 유저가 존재하지 않으면 예외에 메시지를 담아서 반환
+        //     3. 해당 유저가 존재하면 뷰에서 사용할 유저 정보, 해당 유저가 이 계정의 주인이 맞는지에 대한 정보를
+        //        model 에 담아 반환
+        Account findAccount = accountRepository.findByNickname(nickname);
+        if (findAccount == null) {
+            new IllegalArgumentException(nickname + "에 해당하는 사용자가 없습니다.");
+        }
+        model.addAttribute("account", findAccount);
+        model.addAttribute("isOwner", findAccount.equals(account));
+
+        return "account/profile";
     }
 }
