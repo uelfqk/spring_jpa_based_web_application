@@ -181,10 +181,10 @@ public class AccountService implements UserDetailsService {
     //        값을 변경하면 변경감지 동작
     @Transactional
     public void updateProfile(Account account, Profile profile) {
-        Account findAccount = accountRepository.findByNickname(account.getNickname());
-        findAccount.setBio(profile.getBio());
-        findAccount.setUrl(profile.getUrl());
-        findAccount.setOccupation(profile.getOccupation());
-        findAccount.setLocation(profile.getLocation());
+        account.setBio(profile.getBio());
+        account.setUrl(profile.getUrl());
+        account.setOccupation(profile.getOccupation());
+        account.setLocation(profile.getLocation());
+        accountRepository.save(account);
     }
 }

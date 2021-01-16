@@ -3,19 +3,24 @@ package com.studyolle.settings.dto;
 import com.studyolle.domain.Account;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
 
 @Getter @Setter
 public class Profile {
     //TODO 프로필 정보 ( 자개소개 )
+    @Length(max = 35)
     private String bio;
 
     //TODO 웹사이트 URL
+    @Length(max = 50)
     private String url;
 
     //TODO 직업
+    @Length(max = 50)
     private String occupation;
 
     //TODO 주거지
+    @Length(max = 50)
     private String location;
 
     public Profile(Account account) {

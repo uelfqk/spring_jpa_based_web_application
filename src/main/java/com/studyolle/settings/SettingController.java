@@ -6,6 +6,7 @@ import com.studyolle.account.CurrentUser;
 import com.studyolle.domain.Account;
 import com.studyolle.settings.dto.Profile;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -40,9 +41,10 @@ public class SettingController {
     //     3. 수정된 정보를 데이터베이스에 업데이트하는 행위는 AccountService 에 위임
     //     4. POST 요청은 반드시 리다이랙트 처리
     @PostMapping("/settings/profile")
-    public String updateProfile(@Valid  @ModelAttribute Profile profile, Errors errors,
-                                @CurrentUser Account account, Model model, RedirectAttributes attributes) {
-        if(errors.hasErrors()) {
+    public String updateProfile(@Valid @ModelAttribute Profile profile, Errors errors,
+                                @CurrentUser Account account, Model model,
+                                RedirectAttributes attributes) {
+        if (errors.hasErrors()) {
             model.addAttribute("account", account);
             return "settings/profile";
         }
