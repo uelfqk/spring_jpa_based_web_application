@@ -2,6 +2,7 @@ package com.studyolle.account;
 
 import com.studyolle.account.dto.SignUpForm;
 import com.studyolle.domain.Account;
+import com.studyolle.settings.dto.Profile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -168,5 +169,22 @@ public class AccountService implements UserDetailsService {
     public void completeSignUp(Account account) {
         account.completeSignUp();
         login(account);
+    }
+
+    //TODO 2021.01.16 25.프로필 수정
+    //     1. 폼에서 받은 객체의 데이터로 현재 유저 정보의 데이터 업데이트
+    //     2. account 는 현재 준영속(detach) 상태임으로 도메인 객체(account) 만 수정하면
+    //        실제 데이터베이스는 업데이트 되지 않음
+    //      1). Transactional 선언
+    //      2). 영속성 컨텍스트에서 해당 객체를 관리 하지 않기 때문에 변경감지가 동작하지 않음
+    //     3. 해당 도메인 객체의 필드 값으로 accountRepository 를 통해 조회(영속성 컨텍스트에 넣은) 후에
+    //        값을 변경하면 변경감지 동작
+    @Transactional
+    public void updateProfile(Account account, Profile profile) {
+        Account findAccount = accountRepository.findByNickname(account.getNickname());
+        findAccount.setBio(profile.getBio());
+        findAccount.setUrl(profile.getUrl());
+        findAccount.setOccupation(profile.getOccupation());
+        findAccount.setLocation(profile.getLocation());
     }
 }
