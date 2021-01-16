@@ -1,8 +1,8 @@
 package com.studyolle.account;
 
-import com.studyolle.account.dto.SignUpForm;
+import com.studyolle.account.form.SignUpForm;
 import com.studyolle.domain.Account;
-import com.studyolle.settings.dto.Profile;
+import com.studyolle.settings.form.Profile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -185,6 +185,45 @@ public class AccountService implements UserDetailsService {
         account.setUrl(profile.getUrl());
         account.setOccupation(profile.getOccupation());
         account.setLocation(profile.getLocation());
+        account.setProfileImage(profile.getProfileImage());
         accountRepository.save(account);
+    }
+
+    //TODO 2021.01.17 28. 패스워드 수정
+    //     1. 패스워드 변경은 AccountService Layer 로 위임하여 처리
+    //     2. 준영속 상태의 객체의 값을 변경한 뒤 AccountRepository - save 를 호출하여 merge 처리
+    //     3. 패스워드를 데이터베이스에 저장할때는 반드시 PasswordEncoder 를 사용하여 해싱한 값 저장
+    @Transactional
+    public void updatePassword(Account account, String newPassword) {
+        account.setPassword(passwordEncoder.encode(newPassword));
+        accountRepository.save(account);
+    }
+
+    //TODO 2021.01.17 28. 패스워드 수정
+    //     1. 강의 외 패스워드 업데이트 로직 구현
+    //     2. 구현 목적 : 
+    //      1). 현재 패스워드와 새 패스워드의 값이 동일하면 저장하지 않고 
+    //          사용자에게 알림 메시지를 전달하는 방식을 채택
+    //     3. 구현 방법 : 
+    //      1). 데이터베이스에 저장된 비밀번호는 평문과 해싱된 값을 해싱하면 같은지 비교 가능한 
+    //          PasswordEncoder 의 matches 메소드를 활용
+    //      2). 두 비밀번호가 같으면 false 를 반환하여 메시지 출력과 뷰랜더링에 활용        
+    @Transactional
+    public boolean updatePasswordMyLogic(Account account, String newPassword) {
+        if (isEqualsCurrentPassword(account.getPassword(), newPassword)) {
+            return false;
+        }
+
+        account.setPassword(passwordEncoder.encode(newPassword));
+        accountRepository.save(account);
+        return true;
+    }
+
+    //TODO 2021.01.17 28. 패스워드 수정
+    //     1. 강의 외 패스워드 업데이트 로직 구현 ( 검증 로직 )
+    //     2. 해당 로직은 메소드 명으로 어떤 일을 하는지 나타내 가독성을 높이기위해 별도의 메소드로 추출
+    //     3. PasswordEncoder 의 matches 메소드를 이용하여 데이터베이스의 패스워드와 현재 패스워드가 동일한지 비교
+    private boolean isEqualsCurrentPassword(String currentPassword, String newPassword) {
+        return passwordEncoder.matches(newPassword, currentPassword);
     }
 }

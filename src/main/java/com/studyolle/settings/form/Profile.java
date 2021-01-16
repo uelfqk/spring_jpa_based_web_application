@@ -1,4 +1,4 @@
-package com.studyolle.settings.dto;
+package com.studyolle.settings.form;
 
 import com.studyolle.domain.Account;
 import lombok.Getter;
@@ -23,11 +23,14 @@ public class Profile {
     @Length(max = 50)
     private String location;
 
+    private String profileImage;
+
     public Profile(Account account) {
         this.bio = account.getBio();
         this.url = account.getUrl();
         this.occupation = account.getOccupation();
         this.location = account.getLocation();
+        this.profileImage = account.getProfileImage();
     }
 
     //TODO 2021.01.16 25.프로필 수정

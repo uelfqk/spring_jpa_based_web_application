@@ -1,4 +1,4 @@
-package com.studyolle.account.dto;
+package com.studyolle.account.form;
 
 import lombok.Getter;
 import lombok.Setter;
