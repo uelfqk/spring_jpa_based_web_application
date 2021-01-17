@@ -310,4 +310,63 @@ class SettingControllerTest {
                 .andExpect(model().attributeExists("account"))
                 .andExpect(model().attributeExists("notifications"));
     }
+
+    //TODO 2021.01.17 32.닉네임 수정
+    @WithAccount("youngbin")
+    @Test
+    @DisplayName("닉네임 수정 - 입력값 정상")
+    void 닉네임_수정_입력값_정상() throws Exception {
+        mockMvc.perform(post("/settings/account")
+                    .param("nickname", "binybiny")
+                    .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/settings/account"))
+                .andExpect(model().hasNoErrors())
+                .andExpect(flash().attributeExists("message"));
+
+        Account findAccount = accountRepository.findByNickname("binybiny");
+        Assertions.assertThat(findAccount).isNotNull();
+    }
+
+    //TODO 2021.01.17 32.닉네임 수정
+    @WithAccount("youngbin")
+    @Test
+    @DisplayName("닉네임 수정 - 입력값 에러")
+    void 닉네임_수정_입력값_에러() throws Exception {
+        mockMvc.perform(post("/settings/account")
+                .param("nickname", "1")
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(model().hasErrors())
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("nicknameForm"))
+                .andExpect(view().name("settings/account"));
+    }
+
+    //TODO 2021.01.17 32.닉네임 수정
+    @WithAccount("youngbin")
+    @Test
+    @DisplayName("닉네임 수정 - 닉네임 중복")
+    void 닉네임_수정_닉네임_중복() throws Exception {
+        mockMvc.perform(post("/settings/account")
+                .param("nickname", "youngbin")
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(model().hasErrors())
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("nicknameForm"))
+                .andExpect(view().name("settings/account"));
+    }
+
+    //TODO 2021.01.17 32.닉네임 수정
+    @WithAccount("youngbin")
+    @Test
+    @DisplayName("닉네임 수정 - 폼 보여주기")
+    void 닉네임_수정_폼_보여주기() throws Exception {
+        mockMvc.perform(get("/settings/account"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("nicknameForm"))
+                .andExpect(view().name("settings/account"));
+    }
 }

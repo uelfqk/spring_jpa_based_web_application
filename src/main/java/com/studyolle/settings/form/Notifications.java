@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter @Setter
-@NoArgsConstructor
+//@NoArgsConstructor
 public class Notifications {
     //TODO 스터디 생성 결과를 이메일로 받을지 여부
     private boolean studyCreatedByEmail;
@@ -26,12 +26,18 @@ public class Notifications {
     //TODO 스터디 갱신정보를 웹으로 받을지 여부
     private boolean studyUpdatedByWeb;
 
-    public Notifications(Account account) {
-        this.studyCreatedByEmail = account.isStudyCreatedByEmail();
-        this.studyCreatedByWeb = account.isStudyUpdatedByWeb();
-        this.studyEnrollmentResultByEmail = account.isStudyEnrollmentResultByEmail();
-        this.studyEnrollmentResultByWeb = account.isStudyEnrollmentResultByWeb();
-        this.studyUpdatedByEmail = account.isStudyUpdatedByEmail();
-        this.studyUpdatedByWeb = account.isStudyUpdatedByWeb();
-    }
+    //TODO 2021.01.17 31.ModelMapper 적용
+    //     1. Notifications 객체는 스프링 빈이 아니기 때문에 ModelMapper 를 주입 받을 수 없는 상황
+    //     2. 객체의 생성과 프로퍼티 매핑을 해당 객체에서 하지 않고 Controller Layer 로 위임
+    //     3. 해당 생성자 제거, 해당 생성자를 제거함으로 기본 생성자가 활성화 됨으로 @NoArgsConstructor 제거 
+    //     4. Code
+    // ------------------------------------------------------------------------------------
+    // public Notifications(Account account) {
+    //     this.studyCreatedByEmail = account.isStudyCreatedByEmail();
+    //     this.studyCreatedByWeb = account.isStudyUpdatedByWeb();
+    //     this.studyEnrollmentResultByEmail = account.isStudyEnrollmentResultByEmail();
+    //     this.studyEnrollmentResultByWeb = account.isStudyEnrollmentResultByWeb();
+    //     this.studyUpdatedByEmail = account.isStudyUpdatedByEmail();
+    //     this.studyUpdatedByWeb = account.isStudyUpdatedByWeb();
+    // }
 }

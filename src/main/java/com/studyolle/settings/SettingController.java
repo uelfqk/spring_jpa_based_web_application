@@ -2,12 +2,16 @@ package com.studyolle.settings;
 
 import com.studyolle.account.AccountService;
 import com.studyolle.account.CurrentUser;
+import com.studyolle.account.SignUpFormValidator;
 import com.studyolle.domain.Account;
+import com.studyolle.settings.form.NicknameForm;
 import com.studyolle.settings.form.Notifications;
 import com.studyolle.settings.form.PasswordForm;
 import com.studyolle.settings.form.Profile;
+import com.studyolle.settings.validator.NicknameFormValidator;
 import com.studyolle.settings.validator.PasswordFormValidator;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -25,13 +29,20 @@ import javax.validation.Valid;
 public class SettingController {
 
     private final AccountService accountService;
+    private final ModelMapper modelMapper;
+    private final NicknameFormValidator nicknameFormValidator;
 
     //TODO 2021.01.17 28. 패스워드 수정
     //     1. 비밀번호 검증 Validator 를 WebDataBinder 에 등록
     //     2. 스프링 빈으로 등록하지 않았음으로 new operation 을 이용해 등록
     @InitBinder("passwordForm")
-    public void initBinder(WebDataBinder webDataBinder) {
+    public void initPasswordFormBinder(WebDataBinder webDataBinder) {
         webDataBinder.addValidators(new PasswordFormValidator());
+    }
+
+    @InitBinder("nicknameForm")
+    public void initNicknameFormBinder(WebDataBinder webDataBinder) {
+        webDataBinder.addValidators(nicknameFormValidator);
     }
 
     //TODO 2021.01.16 25.프로필 수정
@@ -41,7 +52,7 @@ public class SettingController {
     @GetMapping("/settings/profile")
     public String profileUpdateForm(@CurrentUser Account account, Model model) {
         model.addAttribute("account", account);
-        model.addAttribute("profile", new Profile(account));
+        model.addAttribute("profile", modelMapper.map(account, Profile.class));
         return "settings/profile";
     }
 
@@ -126,7 +137,17 @@ public class SettingController {
     @GetMapping("/settings/notifications")
     public String updateNotificationsForm(@CurrentUser Account account, Model model) {
         model.addAttribute("account", account);
-        model.addAttribute("notifications", new Notifications(account));
+
+        //TODO 2021.01.17 31.ModelMapper 적용
+        //     1. Notifications 는 스프링 빈이 아니기 때문에 의존성을 주입 받을 수 없다.
+        //     2. Notifications 생성을 더이상 해당 객체에서 하지 않고 Controller Layer 로 가져와
+        //        ModelMapper 를 주입받은 후 map 메소드 사용
+        //     3. 사용 방법
+        //      1). Notifications notifications = modelMapper.map(account, Notifications.class);
+        //     4. 동작 방식
+        //      1). Destination 에 해당하는 객체를 생성하고 해당 프로퍼티를 Source 의 값으로 복사
+        //      2). Source : account, Destination : Notifications 의 프로퍼티  
+        model.addAttribute("notifications", modelMapper.map(account, Notifications.class));
         return "settings/notifications";
     }
 
@@ -142,5 +163,29 @@ public class SettingController {
         accountService.updateNotifications(account, notifications);
         attributes.addFlashAttribute("message", "알림 설정이 수정되었습니다.");
         return "redirect:/" + "settings/notifications";
+    }
+
+    //TODO 2021.01.17 32.닉네임 수정
+    //     1. 닉네임 수정 폼 요청 처리 핸들러
+    @GetMapping("/settings/account")
+    public String updateNicknameForm(@CurrentUser Account account, Model model) {
+        model.addAttribute("account", account);
+        model.addAttribute("nicknameForm", modelMapper.map(account, NicknameForm.class));
+        return "settings/account";
+    }
+
+    //TODO 2021.01.17 32.닉네임 수정
+    //     1. 닉네임 수정 요청 처리 핸들러
+    @PostMapping("/settings/account")
+    public String updateNickname(@Valid @ModelAttribute NicknameForm nicknameForm, Errors errors,
+                                        @CurrentUser Account account, Model model, RedirectAttributes attributes) {
+        if(errors.hasErrors()) {
+            model.addAttribute("account", account);
+            return "settings/account";
+        }
+
+        accountService.updateNickname(account, nicknameForm.getNickname());
+        attributes.addFlashAttribute("message", "닉네임이 수정되었습니다.");
+        return "redirect:/" + "settings/account";
     }
 }

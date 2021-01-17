@@ -5,6 +5,7 @@ import com.studyolle.domain.Account;
 import com.studyolle.settings.form.Notifications;
 import com.studyolle.settings.form.Profile;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -58,7 +59,7 @@ public class AccountService implements UserDetailsService {
     private final AccountRepository accountRepository;
     private final JavaMailSender javaMailSender;
     private final PasswordEncoder passwordEncoder;
-
+    private final ModelMapper modelMapper;
     //private final AuthenticationManager authenticationManager;
 
     //TODO 2021.01.09 - 8.회원가입 리팩토링 및 테스트
@@ -181,11 +182,14 @@ public class AccountService implements UserDetailsService {
     //        값을 변경하면 변경감지 동작
     @Transactional
     public void updateProfile(Account account, Profile profile) {
-        account.setBio(profile.getBio());
-        account.setUrl(profile.getUrl());
-        account.setOccupation(profile.getOccupation());
-        account.setLocation(profile.getLocation());
-        account.setProfileImage(profile.getProfileImage());
+        //TODO 2021.01.17 31.ModelMapper 적용
+        //     1. ModelMapper 에 map 메소드 사용
+        //      1). Source 에 있는 값을 Destination 으로 복사해준다.
+        //      2). Source : profile, Destination : account
+        //     2. 사용 방법
+        //      1). modelMapper.map(profile, account);
+        //     3. 기존 코드 제거
+        modelMapper.map(profile, account);
         accountRepository.save(account);
     }
 
@@ -230,12 +234,27 @@ public class AccountService implements UserDetailsService {
     //TODO 2021.01.17 30.알림 설정
     @Transactional
     public void updateNotifications(Account account, Notifications notifications) {
-        account.setStudyCreatedByEmail(notifications.isStudyCreatedByEmail());
-        account.setStudyUpdatedByWeb(notifications.isStudyCreatedByWeb());
-        account.setStudyEnrollmentResultByEmail(notifications.isStudyEnrollmentResultByEmail());
-        account.setStudyEnrollmentResultByWeb(notifications.isStudyEnrollmentResultByWeb());
-        account.setStudyUpdatedByEmail(notifications.isStudyUpdatedByEmail());
-        account.setStudyUpdatedByWeb(notifications.isStudyUpdatedByWeb());
+        //TODO 2021.01.17 31.ModelMapper 적용
+        //     1. ModelMapper 에 map 메소드 사용
+        //      1). Source 에 있는 값을 Destination 으로 복사해준다.
+        //      2). Source : notifications, Destination : account
+        //     2. 사용 방법
+        //      1). modelMapper.map(notifications, account);
+        //     3. 기존 코드 제거
+        modelMapper.map(notifications, account);
         accountRepository.save(account);
+    }
+
+    //TODO 2021.01.17 32.닉네임 수정
+    //     1. 닉네임을 업데이트 한후에 login(account) 호출
+    //     2. 이유
+    //      1). login(account) 을 호출해주지 않으면 인증된 객체 ( principal) 은 이전 상태의 값을 가지고 있기 때문
+    //      2). 서비스를 이용할 때 url 에 nickname 이 포함되는 경우나
+    //          nickname 으로 유저를 조회하는 경우에 장애 발생
+    @Transactional
+    public void updateNickname(Account account, String nickname) {
+        account.setNickname(nickname);
+        accountRepository.save(account);
+        login(account);
     }
 }
