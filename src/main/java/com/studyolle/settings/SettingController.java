@@ -3,6 +3,7 @@ package com.studyolle.settings;
 import com.studyolle.account.AccountService;
 import com.studyolle.account.CurrentUser;
 import com.studyolle.domain.Account;
+import com.studyolle.settings.form.Notifications;
 import com.studyolle.settings.form.PasswordForm;
 import com.studyolle.settings.form.Profile;
 import com.studyolle.settings.validator.PasswordFormValidator;
@@ -119,5 +120,27 @@ public class SettingController {
 
         attributes.addFlashAttribute("message", "비밀번호를 변경했습니다.");
         return "redirect:/" + "settings/password";
+    }
+
+    //TODO 2021.01.17 30.알림 설정
+    @GetMapping("/settings/notifications")
+    public String updateNotificationsForm(@CurrentUser Account account, Model model) {
+        model.addAttribute("account", account);
+        model.addAttribute("notifications", new Notifications(account));
+        return "settings/notifications";
+    }
+
+    //TODO 2021.01.17 30.알림 설정
+    @PostMapping("/settings/notifications")
+    public String updateNotifications(@Valid @ModelAttribute Notifications notifications, Errors errors,
+                                      @CurrentUser Account account, Model model, RedirectAttributes attributes) {
+        if(errors.hasErrors()) {
+            model.addAttribute("account", account);
+            return "settings/notifications";
+        }
+
+        accountService.updateNotifications(account, notifications);
+        attributes.addFlashAttribute("message", "알림 설정이 수정되었습니다.");
+        return "redirect:/" + "settings/notifications";
     }
 }

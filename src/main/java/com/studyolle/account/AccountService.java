@@ -2,6 +2,7 @@ package com.studyolle.account;
 
 import com.studyolle.account.form.SignUpForm;
 import com.studyolle.domain.Account;
+import com.studyolle.settings.form.Notifications;
 import com.studyolle.settings.form.Profile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
@@ -113,12 +114,11 @@ public class AccountService implements UserDetailsService {
         //TODO 2021.01.11 12.회원가입 가입 완료 후 자동 로그인
         //     1. 본래는 AuthenticationManager 가 하는 일을 비즈니스 로직에서 구현 - 결과는 동일
         //     2. 이와 같이 사용하는 이유는 아래 정석적으로 인증하는 방법에 명시
-        List<SimpleGrantedAuthority> authorities = new ArrayList<>(Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")));
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                 new UserAccount(account),
                 //account.getNickname(),
                 account.getPassword(),
-                authorities);
+                Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")));
         SecurityContextHolder.getContext().setAuthentication(token);
 
         //TODO 2021.01.11 12.회원가입 가입 완료 후 자동 로그인
@@ -225,5 +225,17 @@ public class AccountService implements UserDetailsService {
     //     3. PasswordEncoder 의 matches 메소드를 이용하여 데이터베이스의 패스워드와 현재 패스워드가 동일한지 비교
     private boolean isEqualsCurrentPassword(String currentPassword, String newPassword) {
         return passwordEncoder.matches(newPassword, currentPassword);
+    }
+
+    //TODO 2021.01.17 30.알림 설정
+    @Transactional
+    public void updateNotifications(Account account, Notifications notifications) {
+        account.setStudyCreatedByEmail(notifications.isStudyCreatedByEmail());
+        account.setStudyUpdatedByWeb(notifications.isStudyCreatedByWeb());
+        account.setStudyEnrollmentResultByEmail(notifications.isStudyEnrollmentResultByEmail());
+        account.setStudyEnrollmentResultByWeb(notifications.isStudyEnrollmentResultByWeb());
+        account.setStudyUpdatedByEmail(notifications.isStudyUpdatedByEmail());
+        account.setStudyUpdatedByWeb(notifications.isStudyUpdatedByWeb());
+        accountRepository.save(account);
     }
 }

@@ -21,7 +21,7 @@ public class Account {
     @Id @GeneratedValue
     private Long id;
 
-    //TODO 로그인에 필요한 정보 ( 아이디 )
+    //TODO 로그인에 필요한 정보 ( 이메일 )
     @Column(unique = true)
     private String email;
 

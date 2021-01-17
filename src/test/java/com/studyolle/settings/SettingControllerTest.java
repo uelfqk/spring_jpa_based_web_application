@@ -241,7 +241,7 @@ class SettingControllerTest {
     }
 
     //TODO 2021.01.17 29. 패스워드 수정 테스트
-    //     1. 패스워드 변경 - 입력값 에러 테스트
+    //     1. 패스워드 변경 - 입력값 글자수 이상 테스트
     @WithAccount("youngbin")
     @Test
     @DisplayName("패스워드 변경 - 입력값 글자수 이상")
@@ -268,5 +268,46 @@ class SettingControllerTest {
                 .andExpect(model().attributeExists("account"))
                 .andExpect(model().attributeExists("passwordForm"))
                 .andExpect(view().name("settings/password"));
+    }
+
+    //TODO 2021.01.17 30.알림 설정
+    //     1. 알림 설정 변경 테스트
+    @WithAccount("youngbin")
+    @Test
+    @DisplayName("알림 설정 변경")
+    void 알림_설정_변경() throws Exception {
+        mockMvc.perform(post("/settings/notifications")
+                    .param("studyCreatedByEmail", "true")
+                    .param("studyCreatedByWeb", "true")
+                    .param("studyEnrollmentResultByEmail", "true")
+                    .param("studyEnrollmentResultByWeb", "true")
+                    .param("studyUpdatedByEmail", "true")
+                    .param("studyUpdatedByWeb", "true")
+                    .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/settings/notifications"))
+                .andExpect(flash().attributeExists("message"));
+
+        Account findAccount = accountRepository.findByNickname("youngbin");
+
+        Assertions.assertThat(findAccount.isStudyCreatedByEmail()).isTrue();
+        Assertions.assertThat(findAccount.isStudyCreatedByWeb()).isTrue();
+        Assertions.assertThat(findAccount.isStudyEnrollmentResultByEmail()).isTrue();
+        Assertions.assertThat(findAccount.isStudyEnrollmentResultByWeb()).isTrue();
+        Assertions.assertThat(findAccount.isStudyUpdatedByEmail()).isTrue();
+        Assertions.assertThat(findAccount.isStudyUpdatedByWeb()).isTrue();
+    }
+
+    //TODO 2021.01.17 30.알림 설정
+    //     1. 알림 설정 폼 보여주기 테스트
+    @WithAccount("youngbin")
+    @Test
+    @DisplayName("알림 설정 폼 보여주기")
+    void 알림_설정_폼_보여주기() throws Exception {
+        mockMvc.perform(get("/settings/notifications"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("settings/notifications"))
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("notifications"));
     }
 }
