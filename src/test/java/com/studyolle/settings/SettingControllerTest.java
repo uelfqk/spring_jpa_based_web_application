@@ -201,4 +201,72 @@ class SettingControllerTest {
         Account findAccount = accountRepository.findByNickname("youngbin");
         Assertions.assertThat(findAccount.getLocation()).isNull();
     }
+
+    //TODO 2021.01.17 29. 패스워드 수정 테스트
+    //     1. 패스워드 변경 - 입력값 정상 테스트
+    @WithAccount("youngbin")
+    @Test
+    @DisplayName("패스워드 변경 - 입력값 정상")
+    void 패스워드_변경_입력값_정상() throws Exception {
+        mockMvc.perform(post("/settings/password")
+                .param("newPassword", "789456123")
+                .param("newPasswordConfirm", "789456123")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/settings/password"))
+                .andExpect(model().hasNoErrors())
+                .andExpect(flash().attributeExists("message"));
+
+        Account findAccount = accountRepository.findByNickname("youngbin");
+        boolean passwordMatches = passwordEncoder.matches("789456123", findAccount.getPassword());
+
+        Assertions.assertThat(passwordMatches).isTrue();
+    }
+
+    //TODO 2021.01.17 29. 패스워드 수정 테스트
+    //     1. 패스워드 변경 - 입력값 에러 테스트
+    @WithAccount("youngbin")
+    @Test
+    @DisplayName("패스워드 변경 - 입력값 에러")
+    void 패스워드_변경_입력값_에러() throws Exception {
+        mockMvc.perform(post("/settings/password")
+                .param("newPassword", "789456123")
+                .param("newPasswordConfirm", "111111111")
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("settings/password"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("passwordForm"));
+    }
+
+    //TODO 2021.01.17 29. 패스워드 수정 테스트
+    //     1. 패스워드 변경 - 입력값 에러 테스트
+    @WithAccount("youngbin")
+    @Test
+    @DisplayName("패스워드 변경 - 입력값 글자수 이상")
+    void 패스워드_변경_입력값_글자수_이상() throws Exception {
+        mockMvc.perform(post("/settings/password")
+                .param("newPassword", "789456123")
+                .param("newPasswordConfirm", "789456")
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("settings/password"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("passwordForm"));
+    }
+
+    //TODO 2021.01.17 29. 패스워드 수정 테스트
+    //     1. 패스워드 변경 - 폼 보여주기 테스트
+    @WithAccount("youngbin")
+    @Test
+    @DisplayName("패스워드 변경 - 폼 보여주기")
+    void 패스워드_변경_폼_보여주기() throws Exception {
+        mockMvc.perform(get("/settings/password"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("passwordForm"))
+                .andExpect(view().name("settings/password"));
+    }
 }
