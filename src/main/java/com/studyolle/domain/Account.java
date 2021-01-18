@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 //TODO 2021.01.10
@@ -74,6 +75,14 @@ public class Account {
 
     //TODO 스터디 갱신정보를 웹으로 받을지 여부
     private boolean studyUpdatedByWeb;
+
+    //TODO 2021.01.18 35 관심주제 도메인
+    //     1. 유저가 Tag 에 관심있는 사람을 조회하는 기능은 없고
+    //     2. 어떤 유저가 어떤 Tag 를 가지고 있는지에 대허서 더 관심이 많도록 설정
+    //     3. 강의에서는 ManyToMany 관계로 설정하였으나 여기서는 OneToMany - ManyToOne 관계로 설정
+    //      1). 중간 테이블을 엔티티로 승격시켜 관리
+    @OneToMany(mappedBy = "account")
+    private Set<AccountTag> accountTag;
 
     //TODO 2021.01.13 16.가입확인 이메일 재전송
     //     이메일 전송 토큰 생성 시간
