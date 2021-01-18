@@ -2,8 +2,12 @@ package com.studyolle.account;
 
 import com.studyolle.account.form.SignUpForm;
 import com.studyolle.domain.Account;
+import com.studyolle.domain.AccountTag;
+import com.studyolle.domain.Tag;
+import com.studyolle.repository.AccountTagRepository;
 import com.studyolle.settings.form.Notifications;
 import com.studyolle.settings.form.Profile;
+import com.studyolle.settings.form.TagForm;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.mail.SimpleMailMessage;
@@ -18,9 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 //TODO 2021.01.10 - 이메일 전송에 필요한 토큰 발행 후 데이터베이스에 저장되지 않는 이슈
 //     processNewAccount(SignUpForm signUpForm) 메소드를 실행할때는 이미 트랜젝션이 종료된 상태
@@ -269,4 +271,6 @@ public class AccountService implements UserDetailsService {
                 "&email=" + account.getEmail());
         javaMailSender.send(mailMessage);
     }
+
+
 }

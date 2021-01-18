@@ -1,28 +1,32 @@
 package com.studyolle.settings;
 
+import com.studyolle.account.AccountRepository;
 import com.studyolle.account.AccountService;
 import com.studyolle.account.CurrentUser;
 import com.studyolle.account.SignUpFormValidator;
 import com.studyolle.domain.Account;
-import com.studyolle.settings.form.NicknameForm;
-import com.studyolle.settings.form.Notifications;
-import com.studyolle.settings.form.PasswordForm;
-import com.studyolle.settings.form.Profile;
+import com.studyolle.domain.AccountTag;
+import com.studyolle.domain.Tag;
+import com.studyolle.repository.AccountTagRepository;
+import com.studyolle.service.AccountTagService;
+import com.studyolle.settings.form.*;
 import com.studyolle.settings.validator.NicknameFormValidator;
 import com.studyolle.settings.validator.PasswordFormValidator;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -31,6 +35,7 @@ public class SettingController {
     private final AccountService accountService;
     private final ModelMapper modelMapper;
     private final NicknameFormValidator nicknameFormValidator;
+    private final AccountTagService accountTagService;
 
     //TODO 2021.01.17 28. 패스워드 수정
     //     1. 비밀번호 검증 Validator 를 WebDataBinder 에 등록
@@ -187,5 +192,56 @@ public class SettingController {
         accountService.updateNickname(account, nicknameForm.getNickname());
         attributes.addFlashAttribute("message", "닉네임이 수정되었습니다.");
         return "redirect:/" + "settings/account";
+    }
+
+    //TODO 2021.01.19 36.관심 주제 등록 뷰
+    //     1. 태그 입력 폼 요청 처리 핸들러
+    //     2. 기존에 등록한 태그를 유저에게 보여줄 수 있도록 유저가 등록한 태그 조회 후 
+    //        태그의 이름을 가지고 리스트로 변환환 후 model 에 담아 함께 전달
+    @GetMapping("/settings/tags")
+    public String updateTags(@CurrentUser Account account, Model model) {
+        model.addAttribute("account", account);
+        Set<AccountTag> tags = accountTagService.getTags(account);
+
+        //TODO 2021.01.19 36.관심 주제 등록 뷰
+        //     1. AccountTag 의 Tag 인스턴스의 이름을 가지고 리스트로 변환
+        //     2. stream Api (map, collect(Collectors.toList()) 사용
+        List<String> result = tags.stream().map(accountTag -> accountTag.getTag().getTitle())
+                .collect(Collectors.toList());
+
+        model.addAttribute("tags", result);
+
+        return "settings/tags";
+    }
+
+    //TODO 2021.01.19 36.관심 주제 등록 뷰
+    //     1. 폼에서 Ajax 로 전달된 태그를 조회 후 조회된 태그가 없는 경우 데이터베이스에 저장 - 서비스로 위임
+    @PostMapping("/settings/tags/add")
+    @ResponseBody
+    public ResponseEntity addTag(@CurrentUser Account account, @RequestBody TagForm tagForm) {
+        String title = tagForm.getTagTitle();
+
+        //TODO 2021.01.19 36.관심 주제 등록 뷰
+        //     1. 폼에서 Ajax 로 전달된 태그로 조회
+        accountTagService.addTag(account, tagForm);
+
+        return ResponseEntity.ok().build();
+    }
+
+    //TODO 2021.01.19 36.관심 주제 등록 뷰
+    //     1. 폼에서 Ajax 로 전달된 태그를 조회 후 조회된 태그가 없는 경우 BadRequest
+    //     2. 조회 결과가 있는 경우 해당 태그 삭제 - 서비스로 위임
+    @PostMapping("/settings/tags/remove")
+    @ResponseBody
+    public ResponseEntity removeTag(@CurrentUser Account account, @RequestBody TagForm tagForm) {
+        String title = tagForm.getTagTitle();
+
+        //TODO 2021.01.19 36.관심 주제 등록 뷰
+        //     1. 폼에서 Ajax 로 전달된 태그로 조회
+        if(!accountTagService.removeTag(account, tagForm)) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok().build();
     }
 }

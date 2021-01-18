@@ -4,8 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 //TODO 2021.01.10
 //     Spring Data Jpa 에서 findByEmail(String email); 을 정의해서 테스트 중
@@ -20,14 +19,15 @@ import java.util.UUID;
 @EqualsAndHashCode(of = "id")
 public class Account {
     @Id @GeneratedValue
+    @Column(name = "account_id")
     private Long id;
 
     //TODO 로그인에 필요한 정보 ( 이메일 )
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
     //TODO 로그인에 필요한 정보 ( 아이디 )
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String nickname;
 
     //TODO 로그인에 필요한 정보 ( 패스워드 )
@@ -82,12 +82,17 @@ public class Account {
     //     3. 강의에서는 ManyToMany 관계로 설정하였으나 여기서는 OneToMany - ManyToOne 관계로 설정
     //      1). 중간 테이블을 엔티티로 승격시켜 관리
     @OneToMany(mappedBy = "account")
-    private Set<AccountTag> accountTag;
+    private Set<AccountTag> accountTags = new HashSet<>();
 
     //TODO 2021.01.13 16.가입확인 이메일 재전송
     //     이메일 전송 토큰 생성 시간
     //     이메일 토큰을 생성할때 현재시간을 삽입
     private LocalDateTime emailCheckTokenGeneratedAt;
+
+    public void addAccountTag(AccountTag accountTag) {
+        this.accountTags.add(accountTag);
+        accountTag.setAccount(this);
+    }
 
     public void generateEmailCheckToken() {
         this.emailCheckToken = UUID.randomUUID().toString();
