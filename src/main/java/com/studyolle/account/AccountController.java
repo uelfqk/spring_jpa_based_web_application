@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 
@@ -68,7 +69,7 @@ public class AccountController {
 
         //TODO 이메일을 발송할때 발행한 토큰과 브라우저에서 전송한 토큰이 다르면
         //     토큰이 잘못되었다는 의미
-        if(account.isValidEmailToken(token)) {
+        if(!account.isValidEmailToken(token)) {
             model.addAttribute("error", "wrong.token");
             return viewName;
         }
@@ -128,5 +129,59 @@ public class AccountController {
         model.addAttribute("isOwner", findAccount.equals(account));
 
         return "account/profile";
+    }
+
+    //TODO 2021.01.18 33.패스워드를 잊어버렸습니다.
+    //     1. 이메일 로그인 폼 요청 핸들러
+    @GetMapping("/email-login")
+    public String withOutPasswordEmailLoginView() {
+        return "account/email-login";
+    }
+
+    //TODO 2021.01.18 33.패스워드를 잊어버렸습니다.
+    //     1. 폼에서 입력된 이메일을 받아 이메일을 다시 전송하는 핸들러
+    @PostMapping("/email-login")
+    public String sendEmailLoginLink(@RequestParam String email, Model model,
+                                     RedirectAttributes attributes) {
+        Account findAccount = accountRepository.findByEmail(email);
+
+        //TODO 2021.01.18 33.패스워드를 잊어버렸습니다.
+        //     1. 이메일로 유저정보를 조회한 결과가 없으면 유효한 이메일이 아니라는 의미
+        if(findAccount == null) {
+            model.addAttribute("error", "유효한 이메일 주소가 아닙니다.");
+            return "account/email-login";
+        }
+
+        //TODO 2021.01.18 33.패스워드를 잊어버렸습니다.
+        //     1. 이메일을 너무 자주 보내게되면 이슈가 발생할 가능성이 있음으로 1시간에 한번만
+        //        이메일 전송이 가능하도록 처리
+        if(!findAccount.canSendConfirmEmail()) {
+            model.addAttribute("error", "이메일 로그인은 1시간 뒤에 사용할 수 있습니다.");
+            return "account/email-login";
+        }
+
+        accountService.sendLoginLink(findAccount);
+        attributes.addFlashAttribute("message", "인증 이메일을 발송하였습니다.");
+        return "redirect:/email-login";
+    }
+
+    //TODO 2021.01.18 33.패스워드를 잊어버렸습니다.
+    //     1. 이메일로 로그인한 유저에게 패스워드를 변경하라는 폼 요청을 처리하는 핸들러
+    @GetMapping("/login-by-email")
+    public String loginByEmail(@RequestParam String token,
+                               @RequestParam String email, Model model) {
+        Account findAccount = accountRepository.findByEmail(email);
+
+        //TODO 2021.01.18 33.패스워드를 잊어버렸습니다.
+        //     1. 이메일로 조회한 유저가 없거나 이메일 토큰이 유효하지 않은 경우 로그인 실패처리
+        if(findAccount == null || !findAccount.isValidEmailToken(token)) {
+            model.addAttribute("error", "로그인 할 수 없습니다.");
+            return "account/logged-in-by-email";
+        }
+
+        //TODO 2021.01.18 33.패스워드를 잊어버렸습니다.
+        //     1. 유저 로그인 처리
+        accountService.login(findAccount);
+        return "account/logged-in-by-email";
     }
 }

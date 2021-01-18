@@ -113,7 +113,7 @@ public class Account {
     //     폼으로부터 넘어온 매개변수를 비교하여 boolean 값으로 반환
     //     도메인 객체 응집도 향상
     public boolean isValidEmailToken(String token) {
-        return emailCheckToken.equals(token) == false;
+        return emailCheckToken.equals(token);
     }
 
     //TODO 2021.01.13 16.가입확인 이메일 재전송

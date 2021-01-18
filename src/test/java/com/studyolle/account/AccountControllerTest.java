@@ -2,6 +2,7 @@ package com.studyolle.account;
 
 import com.studyolle.account.form.SignUpForm;
 import com.studyolle.domain.Account;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
@@ -64,6 +68,11 @@ class AccountControllerTest {
 
     @Autowired
     AccountService accountService;
+
+    @AfterEach
+    void clear() {
+        accountRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("회원 가입 화면 보이는지 테스트")
@@ -292,12 +301,7 @@ class AccountControllerTest {
     @Test
     @DisplayName("이메일 재전송")
     void 이메일_재전송() throws Exception {
-        SignUpForm signUpForm = new SignUpForm();
-        signUpForm.setNickname("123124");
-        signUpForm.setEmail("email@email.com");
-        signUpForm.setPassword("1111111111");
-
-        Account account = accountService.processNewAccount(signUpForm);
+        Account account = processNewSignUp();
         accountService.login(account);
 
         mockMvc.perform(get("/resend-confirm-email"))
@@ -305,5 +309,107 @@ class AccountControllerTest {
                 .andExpect(view().name("account/check-email"))
                 .andExpect(model().attributeExists("error"))
                 .andExpect(authenticated());
+    }
+
+    //TODO 2021.01.18 33.패스워드를 잊어버렸습니다.
+    //     1. 이메일 로그인 폼 요청 처리 테스트
+    @Test
+    @DisplayName("이메일 로그인 폼 보여주기")
+    void 이메일_로그인_폼_요청() throws Exception {
+        mockMvc.perform(get("/email-login"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("account/email-login"));
+    }
+
+    //TODO 2021.01.18 33.패스워드를 잊어버렸습니다.
+    //     1. 이메일 로그인 발송 실패 테스트 ( 1시간 이전 발송 )
+    @Test
+    @DisplayName("로그인 이메일 발송 - 1 시간 이전 (실패)")
+    void 로그인_이메일_전송_1시간_이전_실패() throws Exception {
+        processNewSignUp();
+
+        mockMvc.perform(post("/email-login")
+                        .param("email", "youngbin@email.com")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("error"))
+                .andExpect(view().name("account/email-login"));
+    }
+
+    //TODO 2021.01.18 33.패스워드를 잊어버렸습니다.
+    //     1. 로그인 이메일 발송 성공 테스트
+    @Test
+    @DisplayName("로그인 이메일 발송 - 1 시간 이후 (성공)")
+    @Transactional
+    void 로그인_이메일_발송_성공() throws Exception {
+        Account account = processNewSignUp();
+
+        Account findAccount = accountRepository.findByEmail(account.getEmail());
+        LocalDateTime emailCheckTokenGeneratedAt = findAccount.getEmailCheckTokenGeneratedAt().minusHours(2);
+        findAccount.setEmailCheckTokenGeneratedAt(emailCheckTokenGeneratedAt);
+
+        mockMvc.perform(post("/email-login")
+                .param("email", "youngbin@email.com")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/email-login"))
+                .andExpect(model().attributeDoesNotExist("error"))
+                .andExpect(flash().attributeExists("message"));
+
+        //TODO 2021.01.18 33.패스워드를 잊어버렸습니다.
+        //     1. 테스트중 발생하는 이메일 2건에 대해서 어떻게 테스트해야하는지 알아보기
+        // Wanted 1 time:
+        // -> at com.studyolle.account.AccountControllerTest.로그인_이메일_발송_성공(AccountControllerTest.java:355)
+        // But was 2 times:
+        // -> at com.studyolle.account.AccountService.sendSignUpConfirmEmail(AccountService.java:104)
+        // -> at com.studyolle.account.AccountService.sendLoginLink(AccountService.java:269)
+        //then(javaMailSender).should().send(any(SimpleMailMessage.class));
+    }
+
+    //TODO 2021.01.18 33.패스워드를 잊어버렸습니다.
+    //     1. 이메일 로그인 실패 테스트
+    @Test
+    @DisplayName("이메일 로그인 - 실패")
+    void 이메일_로그인_실패() throws Exception {
+        Account account = processNewSignUp();
+
+        accountService.sendLoginLink(account);
+
+        String requestUrl = "/login-by-email?" +
+                "token=" + account.getEmailCheckToken() + "123456" +
+                "&email=" + account.getEmail();
+
+        mockMvc.perform(get(requestUrl))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("error"))
+                .andExpect(view().name("account/logged-in-by-email"));
+    }
+
+    //TODO 2021.01.18 33.패스워드를 잊어버렸습니다.
+    //     1. 이메일 로그인 성공 테스트
+    @Test
+    @DisplayName("이메일 로그인 - 성공")
+    @Transactional
+    void 이메일_로그인_성공() throws Exception {
+        Account account = processNewSignUp();
+        accountService.sendLoginLink(account);
+
+        String requestUrl = "/login-by-email?" +
+                "token=" + account.getEmailCheckToken() +
+                "&email=" + account.getEmail();
+
+        mockMvc.perform(get(requestUrl))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeDoesNotExist("error"))
+                .andExpect(view().name("account/logged-in-by-email"));
+    }
+
+    private Account processNewSignUp() {
+        SignUpForm signUpForm = new SignUpForm();
+        signUpForm.setNickname("youngbin");
+        signUpForm.setPassword("123456789");
+        signUpForm.setEmail("youngbin@email.com");
+
+        return accountService.processNewAccount(signUpForm);
     }
 }
