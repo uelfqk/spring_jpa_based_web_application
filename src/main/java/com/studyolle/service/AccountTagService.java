@@ -10,19 +10,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class AccountTagService {
     private final AccountTagRepository accountTagRepository;
-    private final AccountRepository accountRepository;
 
     @Transactional
     public void addTag(Account account, TagForm tagForm) {
-        if(isEmptyTags(tagForm.getTagTitle())) {
+        AccountTag findTag = accountTagRepository.findByTagTitle(tagForm.getTagTitle());
+
+        if(findTag == null) {
             AccountTag accountTag = AccountTag.createAccountTag(account, Tag.createTag(tagForm.getTagTitle()));
             accountTagRepository.save(accountTag);
         }
@@ -30,20 +31,32 @@ public class AccountTagService {
 
     public Set<AccountTag> getTags(Account account) {
         return accountTagRepository.findAccountTags(account.getId());
-//        Optional<Account> findAccount = accountRepository.findById(account.getId());
-//        return findAccount.orElseThrow(() -> new NoSuchElementException("없다.")).getAccountTags();
     }
 
     public boolean removeTag(Account account, TagForm tagForm) {
-        if(isEmptyTags(tagForm.getTagTitle())) {
-            AccountTag accountTag = AccountTag.createAccountTag(account, Tag.createTag(tagForm.getTagTitle()));
-            accountTagRepository.delete(accountTag);
-            return true;
+        AccountTag findTag = accountTagRepository.findByTagTitle(tagForm.getTagTitle());
+        if(findTag == null) {
+            return false;
         }
-        return false;
+
+        accountTagRepository.delete(findTag);
+        return true;
+//        if(!isEmptyTags(tagForm.getTagTitle())) {
+//            AccountTag accountTag = AccountTag.createAccountTag(account, Tag.createTag(tagForm.getTagTitle()));
+//            accountTagRepository.delete(accountTag);
+//            return true;
+//        }
+//        return false;
     }
 
     private boolean isEmptyTags(String title) {
-        return accountTagRepository.findTag(title).isEmpty();
+        return false;
+//        List<AccountTag> tag = accountTagRepository.findTagTitle(title);
+//        return (tag.size() == 0) ? true : false; //accountTagRepository.findTag(title).isEmpty();
+    }
+
+    public List<String> findAllTag() {
+        List<AccountTag> result = accountTagRepository.findAll();
+        return result.stream().map(r -> r.getTag().getTitle()).collect(Collectors.toList());
     }
 }

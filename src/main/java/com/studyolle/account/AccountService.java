@@ -57,12 +57,10 @@ public class AccountService implements UserDetailsService {
     //TODO 2021.01.09 - 8.회원가입 리팩토링 및 테스트
     //     기존 Controller 에서 사용하는 의존성을 Service Layer 로 이동
     //     Controller 의 의존성을 AccountService 만을 받게 변경
-
     private final AccountRepository accountRepository;
     private final JavaMailSender javaMailSender;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
-    //private final AuthenticationManager authenticationManager;
 
     //TODO 2021.01.09 - 8.회원가입 리팩토링 및 테스트
     //     Controller Layer 에서 사용할 메소드만을 public 접근제어자로 공개
@@ -271,6 +269,4 @@ public class AccountService implements UserDetailsService {
                 "&email=" + account.getEmail());
         javaMailSender.send(mailMessage);
     }
-
-
 }

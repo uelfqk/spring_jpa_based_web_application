@@ -75,11 +75,11 @@ class AccountServiceTest {
         accountTagService.addTag(account, tagForm2);
 
         // when
-        List<AccountTag> result = accountTagRepository.findTag(tagForm.getTagTitle());
+        AccountTag result = accountTagRepository.findTagTitle(tagForm.getTagTitle());
 
         // then
 
-        Assertions.assertThat(result.size()).isNotEqualTo(0);
+        Assertions.assertThat(result).isNotNull();
     }
 
     @Test
@@ -117,5 +117,40 @@ class AccountServiceTest {
         result.forEach(r -> System.out.println("r = " + r));
 
         Assertions.assertThat(result.size()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("findAllTags Test")
+    void findAllTagsTest() throws Exception {
+        // given
+        Account account = Account.createAccount("asfasf", "aaaa@email", "123456789");
+        accountRepository.save(account);
+
+        TagForm tagForm = new TagForm();
+        tagForm.setTagTitle("Spring");
+        accountTagService.addTag(account, tagForm);
+
+        TagForm tagForm2 = new TagForm();
+        tagForm2.setTagTitle("Spring1");
+        accountTagService.addTag(account, tagForm2);
+
+        Account account1 = Account.createAccount("asdsad", "asdsada@email", "123456789");
+        accountRepository.save(account1);
+
+        TagForm tagForm3 = new TagForm();
+        tagForm3.setTagTitle("Spring3");
+        accountTagService.addTag(account1, tagForm3);
+
+        TagForm tagForm4 = new TagForm();
+        tagForm4.setTagTitle("Spring4");
+        accountTagService.addTag(account1, tagForm4);
+
+
+        // when
+        List<AccountTag> result = accountTagRepository.findAllTags();
+
+        for (AccountTag accountTag : result) {
+            System.out.println("accountTag.getTag().getTitle() = " + accountTag.getTag().getTitle());
+        }
     }
 }

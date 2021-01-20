@@ -22,7 +22,10 @@ public interface AccountTagRepository extends JpaRepository<AccountTag, Long> {
     @Query("select a from AccountTag a " +
             "join fetch a.tag t " +
             "where t.title = :tagTitle")
-    List<AccountTag> findTag(@Param("tagTitle") String tagTitle);
+    AccountTag findTagTitle(@Param("tagTitle") String tagTitle);
+
+    @Query("select a from AccountTag a join fetch a.tag t")
+    List<AccountTag> findAllTags();
 
     @Query("select a from AccountTag a " +
             "join fetch a.account acc " +

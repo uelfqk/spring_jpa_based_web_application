@@ -1,5 +1,7 @@
 package com.studyolle.settings;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studyolle.account.AccountRepository;
 import com.studyolle.account.AccountService;
 import com.studyolle.account.CurrentUser;
@@ -36,6 +38,7 @@ public class SettingController {
     private final ModelMapper modelMapper;
     private final NicknameFormValidator nicknameFormValidator;
     private final AccountTagService accountTagService;
+    private final ObjectMapper objectMapper;
 
     //TODO 2021.01.17 28. 패스워드 수정
     //     1. 비밀번호 검증 Validator 를 WebDataBinder 에 등록
@@ -199,7 +202,7 @@ public class SettingController {
     //     2. 기존에 등록한 태그를 유저에게 보여줄 수 있도록 유저가 등록한 태그 조회 후 
     //        태그의 이름을 가지고 리스트로 변환환 후 model 에 담아 함께 전달
     @GetMapping("/settings/tags")
-    public String updateTags(@CurrentUser Account account, Model model) {
+    public String updateTags(@CurrentUser Account account, Model model) throws JsonProcessingException {
         model.addAttribute("account", account);
         Set<AccountTag> tags = accountTagService.getTags(account);
 
@@ -208,9 +211,10 @@ public class SettingController {
         //     2. stream Api (map, collect(Collectors.toList()) 사용
         List<String> result = tags.stream().map(accountTag -> accountTag.getTag().getTitle())
                 .collect(Collectors.toList());
-
         model.addAttribute("tags", result);
 
+        List<String> allTags = accountTagService.findAllTag();
+        model.addAttribute("whitelist", objectMapper.writeValueAsString(allTags));
         return "settings/tags";
     }
 
