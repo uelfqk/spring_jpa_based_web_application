@@ -204,7 +204,8 @@ public class SettingController {
     @GetMapping("/settings/tags")
     public String updateTags(@CurrentUser Account account, Model model) throws JsonProcessingException {
         model.addAttribute("account", account);
-        Set<AccountTag> tags = accountTagService.getTags(account);
+        //TODO 2021.01.20 37.관심 주제 조회
+        List<AccountTag> tags = accountTagService.getTags(account);
 
         //TODO 2021.01.19 36.관심 주제 등록 뷰
         //     1. AccountTag 의 Tag 인스턴스의 이름을 가지고 리스트로 변환
@@ -213,6 +214,7 @@ public class SettingController {
                 .collect(Collectors.toList());
         model.addAttribute("tags", result);
 
+        //TODO 2021.01.20 39. 관심주제 자동완성
         List<String> allTags = accountTagService.findAllTag();
         model.addAttribute("whitelist", objectMapper.writeValueAsString(allTags));
         return "settings/tags";
@@ -232,7 +234,7 @@ public class SettingController {
         return ResponseEntity.ok().build();
     }
 
-    //TODO 2021.01.19 36.관심 주제 등록 뷰
+    //TODO 2021.01.19 38.관심 주제 삭제
     //     1. 폼에서 Ajax 로 전달된 태그를 조회 후 조회된 태그가 없는 경우 BadRequest
     //     2. 조회 결과가 있는 경우 해당 태그 삭제 - 서비스로 위임
     @PostMapping("/settings/tags/remove")
@@ -240,7 +242,7 @@ public class SettingController {
     public ResponseEntity removeTag(@CurrentUser Account account, @RequestBody TagForm tagForm) {
         String title = tagForm.getTagTitle();
 
-        //TODO 2021.01.19 36.관심 주제 등록 뷰
+        //TODO 2021.01.19 38.관심 주제 삭제
         //     1. 폼에서 Ajax 로 전달된 태그로 조회
         if(!accountTagService.removeTag(account, tagForm)) {
             return ResponseEntity.badRequest().build();

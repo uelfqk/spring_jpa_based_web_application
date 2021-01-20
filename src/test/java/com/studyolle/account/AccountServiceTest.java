@@ -108,7 +108,7 @@ class AccountServiceTest {
         tagForm4.setTagTitle("Spring4");
         accountTagService.addTag(account1, tagForm4);
 
-        Set<AccountTag> tags = accountTagService.getTags(account);
+        List<AccountTag> tags = accountTagService.getTags(account);
 
         // when
         List<String> result = tags.stream().map(accountTag -> accountTag.getTag().getTitle())
