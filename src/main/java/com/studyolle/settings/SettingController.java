@@ -10,7 +10,9 @@ import com.studyolle.domain.Account;
 import com.studyolle.domain.AccountTag;
 import com.studyolle.domain.Tag;
 import com.studyolle.repository.AccountTagRepository;
+import com.studyolle.repository.TagRepository;
 import com.studyolle.service.AccountTagService;
+import com.studyolle.service.AccountTagServiceV2;
 import com.studyolle.settings.form.*;
 import com.studyolle.settings.validator.NicknameFormValidator;
 import com.studyolle.settings.validator.PasswordFormValidator;
@@ -39,6 +41,8 @@ public class SettingController {
     private final NicknameFormValidator nicknameFormValidator;
     private final AccountTagService accountTagService;
     private final ObjectMapper objectMapper;
+    private final TagRepository tagRepository;
+    private final AccountTagServiceV2 accountTagServiceV2;
 
     //TODO 2021.01.17 28. 패스워드 수정
     //     1. 비밀번호 검증 Validator 를 WebDataBinder 에 등록
@@ -204,18 +208,23 @@ public class SettingController {
     @GetMapping("/settings/tags")
     public String updateTags(@CurrentUser Account account, Model model) throws JsonProcessingException {
         model.addAttribute("account", account);
+
+
         //TODO 2021.01.20 37.관심 주제 조회
-        List<AccountTag> tags = accountTagService.getTags(account);
 
         //TODO 2021.01.19 36.관심 주제 등록 뷰
-        //     1. AccountTag 의 Tag 인스턴스의 이름을 가지고 리스트로 변환
+        //     1. Tag 의 Title 을 이용해 리스트로 변환
         //     2. stream Api (map, collect(Collectors.toList()) 사용
-        List<String> result = tags.stream().map(accountTag -> accountTag.getTag().getTitle())
-                .collect(Collectors.toList());
-        model.addAttribute("tags", result);
+        List<String> tags = accountService.getTags(account);
+
+        model.addAttribute("tags", tags);
 
         //TODO 2021.01.20 39. 관심주제 자동완성
-        List<String> allTags = accountTagService.findAllTag();
+        List<String> allTags = tagRepository.findAll().stream()
+                .map(t -> t.getTitle())
+                .collect(Collectors.toList());
+
+        //TODO 2021.01.20 39. 관심주제 자동완성
         model.addAttribute("whitelist", objectMapper.writeValueAsString(allTags));
         return "settings/tags";
     }
@@ -227,9 +236,15 @@ public class SettingController {
     public ResponseEntity addTag(@CurrentUser Account account, @RequestBody TagForm tagForm) {
         String title = tagForm.getTagTitle();
 
+        Tag tag = tagRepository.findByTitle(title);
+
+        if(tag == null) {
+            tag = tagRepository.save(Tag.createTag(title));
+        }
+
         //TODO 2021.01.19 36.관심 주제 등록 뷰
         //     1. 폼에서 Ajax 로 전달된 태그로 조회
-        accountTagService.addTag(account, tagForm);
+        accountService.addTag(account, tag);
 
         return ResponseEntity.ok().build();
     }
@@ -241,12 +256,16 @@ public class SettingController {
     @ResponseBody
     public ResponseEntity removeTag(@CurrentUser Account account, @RequestBody TagForm tagForm) {
         String title = tagForm.getTagTitle();
+        //AccountTag accountTag = accountTagRepository.findTag(account.getId(), tagForm.getTagTitle());
+
+        Tag tag = tagRepository.findByTitle(title);
+        if(tag == null) {
+            return ResponseEntity.badRequest().build();
+        }
 
         //TODO 2021.01.19 38.관심 주제 삭제
         //     1. 폼에서 Ajax 로 전달된 태그로 조회
-        if(!accountTagService.removeTag(account, tagForm)) {
-            return ResponseEntity.badRequest().build();
-        }
+        accountService.removeTag(account, tag);
 
         return ResponseEntity.ok().build();
     }

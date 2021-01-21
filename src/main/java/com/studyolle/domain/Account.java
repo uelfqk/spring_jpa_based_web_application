@@ -81,7 +81,7 @@ public class Account {
     //     2. 어떤 유저가 어떤 Tag 를 가지고 있는지에 대허서 더 관심이 많도록 설정
     //     3. 강의에서는 ManyToMany 관계로 설정하였으나 여기서는 OneToMany - ManyToOne 관계로 설정
     //      1). 중간 테이블을 엔티티로 승격시켜 관리
-    @OneToMany(mappedBy = "account")
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AccountTag> accountTags = new ArrayList<>();
 
     //TODO 2021.01.13 16.가입확인 이메일 재전송
@@ -89,9 +89,13 @@ public class Account {
     //     이메일 토큰을 생성할때 현재시간을 삽입
     private LocalDateTime emailCheckTokenGeneratedAt;
 
+    public void removeTag(AccountTag accountTag) {
+        accountTags.remove(accountTag);
+    }
+
     public void addAccountTag(AccountTag accountTag) {
         this.accountTags.add(accountTag);
-        accountTag.setAccount(this);
+        //accountTag.setAccount(this);
     }
 
     public void generateEmailCheckToken() {

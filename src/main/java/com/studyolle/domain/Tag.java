@@ -11,6 +11,7 @@ import javax.persistence.Id;
 @Getter @Setter
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString
 public class Tag {
 
     @Id @GeneratedValue

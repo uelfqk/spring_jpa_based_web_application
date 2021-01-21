@@ -5,6 +5,7 @@ import com.studyolle.domain.Account;
 import com.studyolle.domain.AccountTag;
 import com.studyolle.domain.Tag;
 import com.studyolle.repository.AccountTagRepository;
+import com.studyolle.repository.TagRepository;
 import com.studyolle.settings.form.Notifications;
 import com.studyolle.settings.form.Profile;
 import com.studyolle.settings.form.TagForm;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 //TODO 2021.01.10 - 이메일 전송에 필요한 토큰 발행 후 데이터베이스에 저장되지 않는 이슈
 //     processNewAccount(SignUpForm signUpForm) 메소드를 실행할때는 이미 트랜젝션이 종료된 상태
@@ -268,5 +270,40 @@ public class AccountService implements UserDetailsService {
         mailMessage.setText("/login-by-email?token=" + account.getEmailCheckToken() +
                 "&email=" + account.getEmail());
         javaMailSender.send(mailMessage);
+    }
+
+    //TODO 2021.01.20 37.관심 주제 조회
+    //     1. 해당 유저가 입력한 태그를 모두 조회@Transactional
+    public List<String> getTags(Account account) {
+        Account findAccount = accountRepository.findById(account.getId())
+                .orElseThrow(() -> new IllegalStateException(""));
+
+        return findAccount.getAccountTags().stream()
+                .map(r -> r.getTag().getTitle())
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void addTag(Account account, Tag tag) {
+        Account findAccount = accountRepository.findById(account.getId())
+                .orElseThrow(() -> new NoSuchElementException(""));
+
+        AccountTag accountTag = AccountTag.createAccountTag(account, tag);
+
+        findAccount.addAccountTag(accountTag);
+    }
+
+    //TODO 2021.01.20 38.관심 주제 삭제
+    //     1. 해당 태그로 조회하여 결과가 없으면 문제가 있는 것
+    //     2. 조회된 결과를 삭제
+    //      -. 유저에 포함된 AccountTag 를 삭제
+    @Transactional
+    public void removeTag(Account account, Tag tag) {
+        Account findAccount = accountRepository.findById(account.getId())
+                .orElseThrow(() -> new NoSuchElementException(""));
+
+        AccountTag accountTag = AccountTag.createAccountTag(account, tag);
+
+        findAccount.removeTag(accountTag);
     }
 }

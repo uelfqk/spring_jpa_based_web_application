@@ -22,14 +22,19 @@ public class AccountTag {
     @JoinColumn(name = "account_id")
     private Account account;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tag_id")
     private Tag tag;
+
+    public void setAccount(Account account) {
+        this.account = account;
+        account.addAccountTag(this);
+    }
 
     public static AccountTag createAccountTag(Account account, Tag tag) {
         AccountTag accountTag = new AccountTag();
         accountTag.setAccount(account);
-        accountTag.getAccount().addAccountTag(accountTag);
+//        accountTag.getAccount().addAccountTag(accountTag);
         accountTag.setTag(tag);
         return accountTag;
     }
