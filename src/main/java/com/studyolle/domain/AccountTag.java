@@ -38,4 +38,8 @@ public class AccountTag {
         accountTag.setTag(tag);
         return accountTag;
     }
+
+//    public static AccountTag removeAccountTag(Account account) {
+//        AccountTag accountTag = account.getAccountTags().get(0);
+//    }
 }

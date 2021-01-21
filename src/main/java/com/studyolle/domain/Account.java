@@ -82,7 +82,7 @@ public class Account {
     //     3. 강의에서는 ManyToMany 관계로 설정하였으나 여기서는 OneToMany - ManyToOne 관계로 설정
     //      1). 중간 테이블을 엔티티로 승격시켜 관리
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AccountTag> accountTags = new ArrayList<>();
+    private List<AccountTag> accountTags = new LinkedList<>();
 
     //TODO 2021.01.13 16.가입확인 이메일 재전송
     //     이메일 전송 토큰 생성 시간
@@ -91,6 +91,10 @@ public class Account {
 
     public void removeTag(AccountTag accountTag) {
         accountTags.remove(accountTag);
+    }
+
+    public void removeTag() {
+
     }
 
     public void addAccountTag(AccountTag accountTag) {

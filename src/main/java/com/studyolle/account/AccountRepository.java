@@ -16,4 +16,16 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Account findByEmail(String email);
 
     Account findByNickname(String emailOrNickname);
+
+    @Query("select acc from Account acc " +
+            "left outer join fetch acc.accountTags at " +
+            "left outer join fetch at.tag " +
+            "where acc.id = :accountId")
+    Account findAccountTagFetchJoinTag(@Param("accountId") Long accountId);
+
+    @Query("select acc from Account acc " +
+            "left outer join fetch acc.accountTags at " +
+            "left outer join fetch at.tag t " +
+            "where acc.id = :accountId and t.title = :tagTitle")
+    Account findAccountTagAccountIdAndTagTitle(@Param("accountId") Long accountId, @Param("tagTitle") String tagTitle);
 }

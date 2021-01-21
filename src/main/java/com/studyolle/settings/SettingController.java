@@ -9,10 +9,7 @@ import com.studyolle.account.SignUpFormValidator;
 import com.studyolle.domain.Account;
 import com.studyolle.domain.AccountTag;
 import com.studyolle.domain.Tag;
-import com.studyolle.repository.AccountTagRepository;
 import com.studyolle.repository.TagRepository;
-import com.studyolle.service.AccountTagService;
-import com.studyolle.service.AccountTagServiceV2;
 import com.studyolle.settings.form.*;
 import com.studyolle.settings.validator.NicknameFormValidator;
 import com.studyolle.settings.validator.PasswordFormValidator;
@@ -39,10 +36,8 @@ public class SettingController {
     private final AccountService accountService;
     private final ModelMapper modelMapper;
     private final NicknameFormValidator nicknameFormValidator;
-    private final AccountTagService accountTagService;
     private final ObjectMapper objectMapper;
     private final TagRepository tagRepository;
-    private final AccountTagServiceV2 accountTagServiceV2;
 
     //TODO 2021.01.17 28. 패스워드 수정
     //     1. 비밀번호 검증 Validator 를 WebDataBinder 에 등록
@@ -216,6 +211,7 @@ public class SettingController {
         //     1. Tag 의 Title 을 이용해 리스트로 변환
         //     2. stream Api (map, collect(Collectors.toList()) 사용
         List<String> tags = accountService.getTags(account);
+        System.out.println("=======================================================");
 
         model.addAttribute("tags", tags);
 

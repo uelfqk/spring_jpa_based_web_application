@@ -4,11 +4,8 @@ import com.studyolle.account.form.SignUpForm;
 import com.studyolle.domain.Account;
 import com.studyolle.domain.AccountTag;
 import com.studyolle.domain.Tag;
-import com.studyolle.repository.AccountTagRepository;
-import com.studyolle.repository.TagRepository;
 import com.studyolle.settings.form.Notifications;
 import com.studyolle.settings.form.Profile;
-import com.studyolle.settings.form.TagForm;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.mail.SimpleMailMessage;
@@ -275,9 +272,11 @@ public class AccountService implements UserDetailsService {
     //TODO 2021.01.20 37.관심 주제 조회
     //     1. 해당 유저가 입력한 태그를 모두 조회@Transactional
     public List<String> getTags(Account account) {
-        Account findAccount = accountRepository.findById(account.getId())
-                .orElseThrow(() -> new IllegalStateException(""));
-
+//        Account findAccount = accountRepository.findById(account.getId())
+//                .orElseThrow(() -> new IllegalStateException(""));
+        System.out.println("=======================================================");
+        Account findAccount = accountRepository.findAccountTagFetchJoinTag(account.getId());
+        System.out.println("=======================================================");
         return findAccount.getAccountTags().stream()
                 .map(r -> r.getTag().getTitle())
                 .collect(Collectors.toList());
@@ -302,8 +301,9 @@ public class AccountService implements UserDetailsService {
         Account findAccount = accountRepository.findById(account.getId())
                 .orElseThrow(() -> new NoSuchElementException(""));
 
-        AccountTag accountTag = AccountTag.createAccountTag(account, tag);
+        //Account findAccount = accountRepository.findAccountTagAccountIdAndTagTitle(account.getId(), tag.getTitle());
 
-        findAccount.removeTag(accountTag);
+        findAccount.removeTag(AccountTag.createAccountTag(account, tag));
+      //  findAccount.removeTag(findAccount.getAccountTags().get(0));
     }
 }
