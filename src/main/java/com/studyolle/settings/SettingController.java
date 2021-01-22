@@ -234,9 +234,11 @@ public class SettingController {
 
         Tag tag = tagRepository.findByTitle(title);
 
-        if(tag == null) {
-            tag = tagRepository.save(Tag.createTag(title));
+        if(tag != null) {
+            return ResponseEntity.badRequest().build();
         }
+
+        tag = tagRepository.save(Tag.createTag(title));
 
         //TODO 2021.01.19 36.관심 주제 등록 뷰
         //     1. 폼에서 Ajax 로 전달된 태그로 조회

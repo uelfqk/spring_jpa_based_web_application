@@ -298,12 +298,10 @@ public class AccountService implements UserDetailsService {
     //      -. 유저에 포함된 AccountTag 를 삭제
     @Transactional
     public void removeTag(Account account, Tag tag) {
-        Account findAccount = accountRepository.findById(account.getId())
-                .orElseThrow(() -> new NoSuchElementException(""));
+//        Account findAccount = accountRepository.findById(account.getId())
+//                .orElseThrow(() -> new NoSuchElementException(""));
+        Account findAccount = accountRepository.findAccountTagAccountIdAndTagTitle(account.getId(), tag.getTitle());
 
-        //Account findAccount = accountRepository.findAccountTagAccountIdAndTagTitle(account.getId(), tag.getTitle());
-
-        findAccount.removeTag(AccountTag.createAccountTag(account, tag));
-      //  findAccount.removeTag(findAccount.getAccountTags().get(0));
+        findAccount.removeTag(tag.getTitle());
     }
 }

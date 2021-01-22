@@ -26,20 +26,10 @@ public class AccountTag {
     @JoinColumn(name = "tag_id")
     private Tag tag;
 
-    public void setAccount(Account account) {
-        this.account = account;
-        account.addAccountTag(this);
-    }
-
     public static AccountTag createAccountTag(Account account, Tag tag) {
         AccountTag accountTag = new AccountTag();
         accountTag.setAccount(account);
-//        accountTag.getAccount().addAccountTag(accountTag);
         accountTag.setTag(tag);
         return accountTag;
     }
-
-//    public static AccountTag removeAccountTag(Account account) {
-//        AccountTag accountTag = account.getAccountTags().get(0);
-//    }
 }

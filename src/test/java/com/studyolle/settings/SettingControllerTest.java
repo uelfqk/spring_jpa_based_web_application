@@ -1,8 +1,13 @@
 package com.studyolle.settings;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studyolle.WithAccount;
 import com.studyolle.account.AccountRepository;
+import com.studyolle.account.AccountService;
 import com.studyolle.domain.Account;
+import com.studyolle.domain.Tag;
+import com.studyolle.repository.TagRepository;
+import com.studyolle.settings.form.TagForm;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -10,9 +15,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -32,6 +44,18 @@ class SettingControllerTest {
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    TagRepository tagRepository;
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    @Autowired
+    AccountService accountService;
+
+    @PersistenceContext
+    EntityManager em;
 
     @AfterEach
     void after() {
@@ -76,7 +100,7 @@ class SettingControllerTest {
                 .andExpect(flash().attributeExists("message"));
 
         Account findAccount = accountRepository.findByNickname("youngbin");
-        Assertions.assertThat(findAccount.getBio()).isEqualTo(bio);
+        assertThat(findAccount.getBio()).isEqualTo(bio);
     }
 
     @WithAccount("youngbin")
@@ -94,7 +118,7 @@ class SettingControllerTest {
                 .andExpect(model().hasErrors());
 
         Account findAccount = accountRepository.findByNickname("youngbin");
-        Assertions.assertThat(findAccount.getBio()).isNull();
+        assertThat(findAccount.getBio()).isNull();
     }
 
     @WithAccount("youngbin")
@@ -110,7 +134,7 @@ class SettingControllerTest {
                 .andExpect(flash().attributeExists("message"));
 
         Account findAccount = accountRepository.findByNickname("youngbin");
-        Assertions.assertThat(findAccount.getUrl()).isEqualTo(url);
+        assertThat(findAccount.getUrl()).isEqualTo(url);
     }
 
     @WithAccount("youngbin")
@@ -128,7 +152,7 @@ class SettingControllerTest {
                 .andExpect(model().hasErrors());
 
         Account findAccount = accountRepository.findByNickname("youngbin");
-        Assertions.assertThat(findAccount.getUrl()).isNull();
+        assertThat(findAccount.getUrl()).isNull();
     }
 
     @WithAccount("youngbin")
@@ -144,7 +168,7 @@ class SettingControllerTest {
                 .andExpect(flash().attributeExists("message"));
 
         Account findAccount = accountRepository.findByNickname("youngbin");
-        Assertions.assertThat(findAccount.getOccupation()).isEqualTo(occupation);
+        assertThat(findAccount.getOccupation()).isEqualTo(occupation);
     }
 
     @WithAccount("youngbin")
@@ -163,7 +187,7 @@ class SettingControllerTest {
                 .andExpect(model().hasErrors());
 
         Account findAccount = accountRepository.findByNickname("youngbin");
-        Assertions.assertThat(findAccount.getOccupation()).isNull();
+        assertThat(findAccount.getOccupation()).isNull();
     }
 
     @WithAccount("youngbin")
@@ -179,7 +203,7 @@ class SettingControllerTest {
                 .andExpect(flash().attributeExists("message"));
 
         Account findAccount = accountRepository.findByNickname("youngbin");
-        Assertions.assertThat(findAccount.getLocation()).isEqualTo(location);
+        assertThat(findAccount.getLocation()).isEqualTo(location);
     }
 
     @WithAccount("youngbin")
@@ -199,7 +223,7 @@ class SettingControllerTest {
                 .andExpect(model().hasErrors());
 
         Account findAccount = accountRepository.findByNickname("youngbin");
-        Assertions.assertThat(findAccount.getLocation()).isNull();
+        assertThat(findAccount.getLocation()).isNull();
     }
 
     //TODO 2021.01.17 29. 패스워드 수정 테스트
@@ -220,7 +244,7 @@ class SettingControllerTest {
         Account findAccount = accountRepository.findByNickname("youngbin");
         boolean passwordMatches = passwordEncoder.matches("789456123", findAccount.getPassword());
 
-        Assertions.assertThat(passwordMatches).isTrue();
+        assertThat(passwordMatches).isTrue();
     }
 
     //TODO 2021.01.17 29. 패스워드 수정 테스트
@@ -290,12 +314,12 @@ class SettingControllerTest {
 
         Account findAccount = accountRepository.findByNickname("youngbin");
 
-        Assertions.assertThat(findAccount.isStudyCreatedByEmail()).isTrue();
-        Assertions.assertThat(findAccount.isStudyCreatedByWeb()).isTrue();
-        Assertions.assertThat(findAccount.isStudyEnrollmentResultByEmail()).isTrue();
-        Assertions.assertThat(findAccount.isStudyEnrollmentResultByWeb()).isTrue();
-        Assertions.assertThat(findAccount.isStudyUpdatedByEmail()).isTrue();
-        Assertions.assertThat(findAccount.isStudyUpdatedByWeb()).isTrue();
+        assertThat(findAccount.isStudyCreatedByEmail()).isTrue();
+        assertThat(findAccount.isStudyCreatedByWeb()).isTrue();
+        assertThat(findAccount.isStudyEnrollmentResultByEmail()).isTrue();
+        assertThat(findAccount.isStudyEnrollmentResultByWeb()).isTrue();
+        assertThat(findAccount.isStudyUpdatedByEmail()).isTrue();
+        assertThat(findAccount.isStudyUpdatedByWeb()).isTrue();
     }
 
     //TODO 2021.01.17 30.알림 설정
@@ -325,7 +349,7 @@ class SettingControllerTest {
                 .andExpect(flash().attributeExists("message"));
 
         Account findAccount = accountRepository.findByNickname("binybiny");
-        Assertions.assertThat(findAccount).isNotNull();
+        assertThat(findAccount).isNotNull();
     }
 
     //TODO 2021.01.17 32.닉네임 수정
@@ -368,5 +392,123 @@ class SettingControllerTest {
                 .andExpect(model().attributeExists("account"))
                 .andExpect(model().attributeExists("nicknameForm"))
                 .andExpect(view().name("settings/account"));
+    }
+
+    //TODO 2021.01.22 41.관심 주제 테스트
+    //     1. 계정에
+    @WithAccount("youngbin")
+    @Test
+    @DisplayName("계정의 태그 조회 폼 보여주기")
+    void 태그_조회_폼_요청() throws Exception {
+        mockMvc.perform(get("/settings/tags"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("settings/tags"))
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("tags"))
+                .andExpect(model().attributeExists("whitelist"));
+    }
+
+    //TODO 2021.01.22 41.관심 주제 테스트
+    //     1. 테스트 주제
+    //      1). 계정에 태그 추가 - 성공 테스트
+    //     2. 테스트 목록
+    //      1). 추가한 태그가 NotNull 인지
+    //      2). 추가된 태그가 입력한 태그와 동일한지 (title)
+    //      3). 계정 (Account) 가 가지고있는 AccountTag (중간 엔티티) 의 크기가 1 인지
+    //     3. mockMvc.perform POST 요청으로 요청 본문에 json 담아 보내는 방법
+    //        .contentType(MediaType.APPLICATION_JSON)
+    //        .content(objectMapper.writeValueAsString(object)) 사용
+    @WithAccount("youngbin")
+    @Test
+    @DisplayName("계정에 태그 추가 - 성공")
+    @Transactional
+    void 계정에_태그_추가_성공() throws Exception {
+        TagForm tagForm = new TagForm();
+        tagForm.setTagTitle("newTag");
+
+        mockMvc.perform(post("/settings/tags/add")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(tagForm))
+                    .with(csrf()))
+                .andExpect(status().isOk());
+
+        Tag findTag = tagRepository.findByTitle("newTag");
+        Account findAccount = accountRepository.findByNickname("youngbin");
+
+        assertThat(findTag).isNotNull();
+        assertThat(findTag.getTitle()).isEqualTo("newTag");
+        assertThat(findAccount.getAccountTags().size()).isEqualTo(1);
+    }
+
+    //TODO 2021.01.22 41.관심 주제 테스트
+    //     1. 테스트 주제
+    //      1). 계정에 태그 추가 - 중복 등록 실패 테스트
+    //     2. 테스트 목록
+    //      1). 중복등록된 경우 badRequest 를 반환 하도록 작성하여 이를 검증
+    //       -. .andExpect(status().isBadRequest());
+    //      2). 추가한 태그가 NotNull 인지
+    //      3). 추가된 태그가 입력한 태그와 동일한지 (title)
+    //      4). 계정 (Account) 가 가지고있는 AccountTag (중간 엔티티) 의 크기가 1 인지
+    @WithAccount("youngbin")
+    @Test @DisplayName("계정에 태그 추가 - 중복 등록 실패")
+    @Transactional
+    void 계정에_태그_추가_중복_등록_실패() throws Exception {
+        TagForm tagForm = new TagForm();
+        tagForm.setTagTitle("newTag");
+
+        Account account = accountRepository.findByNickname("youngbin");
+
+        em.clear();
+        em.flush();
+
+        Tag tag = tagRepository.save(Tag.createTag(tagForm.getTagTitle()));
+
+        accountService.addTag(account, tag);
+
+        mockMvc.perform(post("/settings/tags/add")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(tagForm))
+                .with(csrf()))
+                .andExpect(status().isBadRequest());
+
+        Tag findTag = tagRepository.findByTitle("newTag");
+        Account findAccount = accountRepository.findByNickname("youngbin");
+
+        assertThat(findTag).isNotNull();
+        assertThat(findAccount.getAccountTags().size()).isEqualTo(1);
+    }
+
+    //TODO 2021.01.22 41.관심 주제 테스트
+    //     1. 테스트 주제
+    //      1). 계정에 태그 제거 테스트
+    //     2. 테스트 목록
+    //      1). 태그 제거 후 해당 이름의 태그가 데이터베이스에도 제거 됬는지 (AccountTag 로 확인)
+    //      2). 태그 엔티티는 그대로 존재하는지
+    //      3). 계정 (Account) 가 가지고있는 AccountTag (중간 엔티티) 의 크기가 0 인지
+    @WithAccount("youngbin")
+    @Test @DisplayName("계정에 태그 제거")
+    @Transactional
+    void 계정에_태그_제거() throws Exception {
+        TagForm tagForm = new TagForm();
+        tagForm.setTagTitle("newTag");
+
+        Account account = accountRepository.findByNickname("youngbin");
+
+        Tag tag = tagRepository.save(Tag.createTag(tagForm.getTagTitle()));
+
+        accountService.addTag(account, tag);
+
+        mockMvc.perform(post("/settings/tags/remove")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(tagForm))
+                .with(csrf()))
+                .andExpect(status().isOk());
+
+        Tag findTag = tagRepository.findByTitle("newTag");
+        Account findAccount = accountRepository.findByNickname("youngbin");
+
+        assertThat(findTag).isNotNull();
+        assertThat(findTag.getTitle()).isEqualTo("newTag");
+        assertThat(findAccount.getAccountTags().size()).isEqualTo(0);
     }
 }

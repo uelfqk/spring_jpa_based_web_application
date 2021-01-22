@@ -89,17 +89,13 @@ public class Account {
     //     이메일 토큰을 생성할때 현재시간을 삽입
     private LocalDateTime emailCheckTokenGeneratedAt;
 
-    public void removeTag(AccountTag accountTag) {
-        accountTags.remove(accountTag);
-    }
-
-    public void removeTag() {
-
+    public void removeTag(String tagTitle) {
+        accountTags.removeIf(a -> a.getTag().getTitle().equals(tagTitle));
     }
 
     public void addAccountTag(AccountTag accountTag) {
         this.accountTags.add(accountTag);
-        //accountTag.setAccount(this);
+        accountTag.setAccount(this);
     }
 
     public void generateEmailCheckToken() {
