@@ -28,4 +28,17 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
             "join fetch at.tag t " +
             "where acc.id = :accountId and t.title = :tagTitle")
     Account findAccountTagAccountIdAndTagTitle(@Param("accountId") Long accountId, @Param("tagTitle") String tagTitle);
+
+    @Query("select acc from Account acc " +
+            "left outer join fetch acc.accountZones az " +
+            "left outer join fetch az.zone " +
+            "where acc.id = :account_id")
+    Account findAccountZoneLeftJoinFetch(@Param("account_id") Long accountId);
+
+    @Query("select acc from Account acc " +
+            "join fetch acc.accountZones az " +
+            "join fetch az.zone z " +
+            "where acc.id = :account_id and z.zoneName = :zoneName")
+    Account findAccountZoneJoinFetch(@Param("account_id") Long accountId, @Param("zoneName") String zoneName);
+
 }

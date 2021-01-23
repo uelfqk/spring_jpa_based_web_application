@@ -2,14 +2,13 @@ package com.studyolle.settings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.studyolle.account.AccountRepository;
 import com.studyolle.account.AccountService;
 import com.studyolle.account.CurrentUser;
-import com.studyolle.account.SignUpFormValidator;
 import com.studyolle.domain.Account;
-import com.studyolle.domain.AccountTag;
 import com.studyolle.domain.Tag;
+import com.studyolle.domain.Zone;
 import com.studyolle.repository.TagRepository;
+import com.studyolle.zone.ZoneRepository;
 import com.studyolle.settings.form.*;
 import com.studyolle.settings.validator.NicknameFormValidator;
 import com.studyolle.settings.validator.PasswordFormValidator;
@@ -25,8 +24,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
@@ -38,6 +35,7 @@ public class SettingController {
     private final NicknameFormValidator nicknameFormValidator;
     private final ObjectMapper objectMapper;
     private final TagRepository tagRepository;
+    private final ZoneRepository zoneRepository;
 
     //TODO 2021.01.17 28. 패스워드 수정
     //     1. 비밀번호 검증 Validator 를 WebDataBinder 에 등록
@@ -234,11 +232,9 @@ public class SettingController {
 
         Tag tag = tagRepository.findByTitle(title);
 
-        if(tag != null) {
-            return ResponseEntity.badRequest().build();
+        if(tag == null) {
+            tag = tagRepository.save(Tag.createTag(title));
         }
-
-        tag = tagRepository.save(Tag.createTag(title));
 
         //TODO 2021.01.19 36.관심 주제 등록 뷰
         //     1. 폼에서 Ajax 로 전달된 태그로 조회
@@ -265,6 +261,42 @@ public class SettingController {
         //     1. 폼에서 Ajax 로 전달된 태그로 조회
         accountService.removeTag(account, tag);
 
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/settings/zones")
+    public String createZonesForm(@CurrentUser Account account, Model model) {
+        model.addAttribute("account", account);
+        return "settings/zones";
+    }
+
+    @PostMapping("/settings/zones/add")
+    @ResponseBody
+    public ResponseEntity addZone(@CurrentUser Account account, @RequestBody ZoneForm zoneForm) {
+        String zoneName = zoneForm.getZoneName();
+
+        Zone zone = zoneRepository.findByZoneName(zoneName);
+
+        if(zone == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        accountService.addZone(account, zone);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/settings/zones/remove")
+    @ResponseBody
+    public ResponseEntity removeZone(@CurrentUser Account account, @RequestBody ZoneForm zoneForm) {
+        String zoneName = zoneForm.getZoneName();
+
+        Zone zone = zoneRepository.findByZoneName(zoneName);
+
+        if(zone == null) {
+            ResponseEntity.badRequest().build();
+        }
+
+        accountService.removeZone(account, zone);
         return ResponseEntity.ok().build();
     }
 }

@@ -1,9 +1,7 @@
 package com.studyolle.account;
 
 import com.studyolle.account.form.SignUpForm;
-import com.studyolle.domain.Account;
-import com.studyolle.domain.AccountTag;
-import com.studyolle.domain.Tag;
+import com.studyolle.domain.*;
 import com.studyolle.settings.form.Notifications;
 import com.studyolle.settings.form.Profile;
 import lombok.RequiredArgsConstructor;
@@ -303,5 +301,17 @@ public class AccountService implements UserDetailsService {
         Account findAccount = accountRepository.findAccountTagAccountIdAndTagTitle(account.getId(), tag.getTitle());
 
         findAccount.removeTag(tag.getTitle());
+    }
+
+    @Transactional
+    public void addZone(Account account, Zone zone) {
+        Account findAccount = accountRepository.findAccountZoneLeftJoinFetch(account.getId());
+        findAccount.addAccountZone(AccountZone.createAccountZone(account, zone));
+    }
+
+    @Transactional
+    public void removeZone(Account account, Zone zone) {
+        Account findAccount = accountRepository.findAccountZoneJoinFetch(account.getId(), zone.getCity());
+        findAccount.removeAccountZone(zone.getCity());
     }
 }
