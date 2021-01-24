@@ -106,7 +106,11 @@ public class Account {
     }
 
     public void removeAccountZone(String zoneName) {
-        accountZones.removeIf(r -> r.getZone().getZoneName().equals(zoneName));
+        accountZones.removeIf(r -> r.getZone().getCity().equals(zoneName));
+    }
+
+    public void removeAccountZone(Long zoneId) {
+        accountZones.removeIf(r -> r.getZone().getId() == zoneId);
     }
 
     public void addAccountZone(AccountZone accountZone) {

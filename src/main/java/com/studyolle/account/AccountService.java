@@ -304,14 +304,29 @@ public class AccountService implements UserDetailsService {
     }
 
     @Transactional
-    public void addZone(Account account, Zone zone) {
+    public void addAccountZone(Account account, Zone zone) {
         Account findAccount = accountRepository.findAccountZoneLeftJoinFetch(account.getId());
         findAccount.addAccountZone(AccountZone.createAccountZone(account, zone));
     }
 
     @Transactional
-    public void removeZone(Account account, Zone zone) {
-        Account findAccount = accountRepository.findAccountZoneJoinFetch(account.getId(), zone.getCity());
-        findAccount.removeAccountZone(zone.getCity());
+    public void removeAccountZone(Account account, Zone zone) {
+        Account findAccount = accountRepository.findAccountZoneJoinFetch(account.getId(), zone.getId());
+        findAccount.removeAccountZone(zone.getId());
     }
+
+    public List<String> getZones(Account account) {
+        Account findAccount = accountRepository.findAccountZoneLeftJoinFetch(account.getId());
+        return findAccount.getAccountZones().stream()
+                .map(z -> zoneString(z.getZone()))
+                .collect(Collectors.toList());
+    }
+
+    public String zoneString(Zone zone) {
+        return String.format("{}({}/{})",
+                zone.getCity(),
+                zone.getLocalNameOfCity(),
+                zone.getProvince());
+    }
+
 }

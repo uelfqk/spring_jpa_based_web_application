@@ -1,5 +1,6 @@
 package com.studyolle.domain;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import javax.persistence.*;
 
 @Entity
 @Getter @Setter
+@EqualsAndHashCode(of = "id")
 @NoArgsConstructor
 public class AccountTag {
 

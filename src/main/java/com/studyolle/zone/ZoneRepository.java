@@ -6,5 +6,5 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional(readOnly = true)
 public interface ZoneRepository extends JpaRepository<Zone, Long> {
-    Zone findByZoneName(String zoneName);
+    Zone findByCityAndProvince(String city, String province);
 }

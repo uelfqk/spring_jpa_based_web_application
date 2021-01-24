@@ -264,39 +264,71 @@ public class SettingController {
         return ResponseEntity.ok().build();
     }
 
+    //TODO 2021.01.24 43.지역 정보 추가,삭제 / 테스트
+    //     1. 지역정보 폼 요청 처리 핸들러
+    //     2. 유저가 등록한 지역정보를 조회하여 폼으로 전달
+    //      1). List<String> 형식 - Java8 의 stream Api 사용 stream().map().collect()
+    //     3. ZoneService 의 @PostConstruct 에서 등록한 지역정보를 화이트 리스트로 json 형태로 변환하여 폼에 전달
+    //      1). List<String> 형식 - Java8 의 stream Api 사용 stream().map().collect()
     @GetMapping("/settings/zones")
-    public String createZonesForm(@CurrentUser Account account, Model model) {
+    public String updateZonesForm(@CurrentUser Account account, Model model) throws JsonProcessingException {
         model.addAttribute("account", account);
+
+        List<String> zoneList = accountService.getZones(account);
+
+        List<String> whiteList = zoneRepository.findAll().stream()
+                .map(z -> z.toString())
+                .collect(Collectors.toList());
+
+        model.addAttribute("zones", zoneList);
+        model.addAttribute("whitelist", objectMapper.writeValueAsString(whiteList));
+
         return "settings/zones";
     }
 
+    //TODO 2021.01.24 43.지역 정보 추가,삭제 / 테스트
+    //     1. 계정에 지역정보 추가
+    //      1). Account(add 요청을 한 유저)
+    //      2). AccountZone (유저와 지역정보의 연결점) - Account 객체에 AccountZone 을 추가
+    //       -. AccountZone 객체에는 Account 의 PK 와 Zone 의 PK FK 로 매핑
+    //      3). Zone (생성된 데이터)
+    //     2. 폼에서 전달받은 본문의 json 데이터를 파싱하고 city 데이터와 province 데이터를 이용해
+    //        지역정보 데이터베이스에 해당 데이터가 있는지 조회 및 확인
+    //     3. 조회 정보가 없다면 잘못된 요청으로 badRequest 반환
+    //     4. 조회 결과를 가지고 AccountZone insert 수행
     @PostMapping("/settings/zones/add")
     @ResponseBody
-    public ResponseEntity addZone(@CurrentUser Account account, @RequestBody ZoneForm zoneForm) {
-        String zoneName = zoneForm.getZoneName();
+    public ResponseEntity addAccountZone(@CurrentUser Account account, @RequestBody ZoneForm zoneForm) {
+        Zone zone = zoneRepository.findByCityAndProvince(zoneForm.getCity(), zoneForm.getProvince());
 
-        Zone zone = zoneRepository.findByZoneName(zoneName);
-
-        if(zone == null) {
+        if (zone == null) {
             return ResponseEntity.badRequest().build();
         }
 
-        accountService.addZone(account, zone);
+        accountService.addAccountZone(account, zone);
         return ResponseEntity.ok().build();
     }
 
+
+    //TODO 2021.01.24 43.지역 정보 추가,삭제 / 테스트
+    //     1. 계정에 지역정보 삭제
+    //      1). Account(remove 요청을 한 유저)
+    //      2). AccountZone (유저와 지역정보의 연결점) - Account 객체에 AccountZone 을 삭제
+    //      3). Zone (생성된 데이터)
+    //     2. 폼에서 전달받은 본문의 json 데이터를 파싱하고 city 데이터와 province 데이터를 이용해
+    //        지역정보 데이터베이스에 해당 데이터가 있는지 조회 및 확인
+    //     3. 조회 정보가 없다면 잘못된 요청으로 badRequest 반환
+    //     4. 조회 결과를 가지고 AccountZone remove 수행 - Zone 객체의 데이터를 삭제하는것이 아님
     @PostMapping("/settings/zones/remove")
     @ResponseBody
-    public ResponseEntity removeZone(@CurrentUser Account account, @RequestBody ZoneForm zoneForm) {
-        String zoneName = zoneForm.getZoneName();
-
-        Zone zone = zoneRepository.findByZoneName(zoneName);
+    public ResponseEntity removeAccountZone(@CurrentUser Account account, @RequestBody ZoneForm zoneForm) {
+        Zone zone = zoneRepository.findByCityAndProvince(zoneForm.getCity(), zoneForm.getProvince());
 
         if(zone == null) {
             ResponseEntity.badRequest().build();
         }
 
-        accountService.removeZone(account, zone);
+        accountService.removeAccountZone(account, zone);
         return ResponseEntity.ok().build();
     }
 }

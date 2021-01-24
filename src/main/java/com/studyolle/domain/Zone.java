@@ -1,9 +1,6 @@
 package com.studyolle.domain;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,6 +9,7 @@ import javax.persistence.Id;
 
 @Entity
 @Getter @Setter
+@EqualsAndHashCode(of = "id")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Zone {
 
@@ -33,5 +31,10 @@ public class Zone {
         zone.setLocalNameOfCity(localNameOfCity);
         zone.setProvince(province);
         return zone;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s(%s)/%s", city, localNameOfCity, province);
     }
 }

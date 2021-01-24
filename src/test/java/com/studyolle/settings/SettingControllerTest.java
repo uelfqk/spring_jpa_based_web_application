@@ -5,9 +5,13 @@ import com.studyolle.WithAccount;
 import com.studyolle.account.AccountRepository;
 import com.studyolle.account.AccountService;
 import com.studyolle.domain.Account;
+import com.studyolle.domain.AccountZone;
 import com.studyolle.domain.Tag;
+import com.studyolle.domain.Zone;
 import com.studyolle.repository.TagRepository;
 import com.studyolle.settings.form.TagForm;
+import com.studyolle.settings.form.ZoneForm;
+import com.studyolle.zone.ZoneRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,6 +57,9 @@ class SettingControllerTest {
 
     @Autowired
     AccountService accountService;
+
+    @Autowired
+    ZoneRepository zoneRepository;
 
     @PersistenceContext
     EntityManager em;
@@ -510,5 +517,117 @@ class SettingControllerTest {
         assertThat(findTag).isNotNull();
         assertThat(findTag.getTitle()).isEqualTo("newTag");
         assertThat(findAccount.getAccountTags().size()).isEqualTo(0);
+    }
+
+    //TODO 2021.01.24 43.지역 정보 추가,삭제 / 테스트
+    //     1. 테스트 주제
+    //      1). 해당 계정의 지역정보 조회 폼 요청
+    //     2. 테스트 목록
+    //      1). 요청에 대한 응답이 Http Status Code 200 (Ok) 인지
+    //      2). 반환되는 view 의 이름이 settings/zones 인지
+    //      3). model 에 account 가 포함되어있는지
+    //      4). model 에 zones 가 포함되어있는지
+    //      5). model 에 whitelist 가 포함되어있는지
+    @WithAccount("youngbin")
+    @Test @DisplayName("계정의 태그 조회 폼 보여주기")
+    void 계정의_지역정보_조회_폼_요청() throws Exception {
+        mockMvc.perform(get("/settings/zones"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("settings/zones"))
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("zones"))
+                .andExpect(model().attributeExists("whitelist"));
+    }
+
+    //TODO 2021.01.24 43.지역 정보 추가,삭제 / 테스트
+    //     1. 테스트 주제
+    //      1). 계정에 지역정보 추가 - 성공
+    //     2. 테스트 목록
+    //      1). 요청에 대한 응답이 Http Status Code 200 (Ok) 인지
+    //      2). 계정에 해당 지역정보가 추가 되었는지
+    //      3). 계정에 추가한 지역정보의 이름이 전송한 지역정보와 동일한지
+    //      4). 계정에 추가한 지역정보의 나라별 이름이 전송한 지역정보와 동일한지
+    //      5). 계정에 추가한 지역정보의 지역이 전송한 지역과 동일한지
+    @WithAccount("youngbin")
+    @Test @DisplayName("계정에 지역정보 추가 - 성공")
+    @Transactional
+    void 계정에_지역정보_추가_성공() throws Exception {
+        ZoneForm zoneForm = new ZoneForm();
+        zoneForm.setZoneName("Seoul(서울특별시)/none");
+
+        mockMvc.perform(post("/settings/zones/add")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(zoneForm))
+                .with(csrf()))
+        .andExpect(status().isOk());
+
+        Account findAccount = accountRepository.findByNickname("youngbin");
+
+        AccountZone accountZone = findAccount.getAccountZones().get(0);
+
+        assertThat(findAccount.getAccountZones().size()).isEqualTo(1);
+        assertThat(accountZone.getZone().getCity()).isEqualTo("Seoul");
+        assertThat(accountZone.getZone().getLocalNameOfCity()).isEqualTo("서울특별시");
+        assertThat(accountZone.getZone().getProvince()).isEqualTo("none");
+    }
+
+    //TODO 2021.01.24 43.지역 정보 추가,삭제 / 테스트
+    //     1. 테스트 주제
+    //      1). 데이터베이스에 존재하지 않는 지역을 계정에 추가 - 실패
+    //     2. 테스트 목록
+    //      1). 요청에 대한 응답이 Http Status Code 400 (badRequest) 인지
+    //      2). 계정에 해당 지역정보가 추가 되지 않았는지
+    @WithAccount("youngbin")
+    @Test @DisplayName("데이터베이스에 존재하지 않는 지역을 계정에 추가 - 실패")
+    @Transactional
+    void 데이터베이스에_존재하지_않는_지역_계정에_추가_실패() throws Exception {
+        ZoneForm zoneForm = new ZoneForm();
+        zoneForm.setZoneName("wqZnakj(안녕하세요)/none");
+
+        String json = objectMapper.writeValueAsString(zoneForm);
+
+        mockMvc.perform(post("/settings/zones/add")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .with(csrf()))
+                .andExpect(status().isBadRequest());
+
+        Account findAccount = accountRepository.findByNickname("youngbin");
+
+        assertThat(findAccount.getAccountZones().size()).isEqualTo(0);
+    }
+
+    //TODO 2021.01.24 43.지역 정보 추가,삭제 / 테스트
+    //     1. 테스트 주제
+    //      1). 계정에 지역정보 삭제 - 성공
+    //     2. 테스트 목록
+    //      1). 요청에 대한 응답이 Http Status Code 200 (Ok) 인지
+    //      2). 계정에 해당 지역정보가 삭제 되었는지 
+    //      3). 계정에 포함된 지역정보만 삭제 되었는지 
+    //       -. 지역정보 테이블에 데이터는 삭제 되지 않았는지
+    @WithAccount("youngbin")
+    @Test @DisplayName("계정에 지역정보 삭제 - 성공")
+    @Transactional
+    void 계정에_지역정보_삭제_성공() throws Exception {
+        ZoneForm zoneForm = new ZoneForm();
+        zoneForm.setZoneName("Seoul(서울특별시)/none");
+
+        Account account = accountRepository.findByNickname("youngbin");
+        Zone zone = zoneRepository.findByCityAndProvince(zoneForm.getCity(),
+                                                         zoneForm.getProvince());
+
+        accountService.addAccountZone(account, zone);
+
+        mockMvc.perform(post("/settings/zones/remove")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(zoneForm))
+                .with(csrf()))
+                .andExpect(status().isOk());
+
+        Account findAccount = accountRepository.findByNickname("youngbin");
+        Zone findZone = zoneRepository.findByCityAndProvince("Seoul", "none");
+
+        assertThat(findAccount.getAccountZones().size()).isEqualTo(0);
+        assertThat(findZone).isNotNull();
     }
 }
