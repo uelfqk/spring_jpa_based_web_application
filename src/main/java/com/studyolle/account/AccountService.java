@@ -2,12 +2,16 @@ package com.studyolle.account;
 
 import com.studyolle.account.form.SignUpForm;
 import com.studyolle.domain.*;
+import com.studyolle.email.EmailMessage;
+import com.studyolle.email.EmailService;
 import com.studyolle.settings.form.Notifications;
 import com.studyolle.settings.form.Profile;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -48,6 +54,7 @@ import java.util.stream.Collectors;
 //      5). 참고2 : 트랜잭션을 사용하는 메소드가 많은 경우 반대로 클래스단에 @Transactional 을 설정하고
 //                 트랜잭션을 사용하지 않는 메소드 (조회) 에 @Transactional(readOnly = true) 을 주어 성능 향상 도모
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AccountService implements UserDetailsService {
@@ -55,7 +62,8 @@ public class AccountService implements UserDetailsService {
     //     기존 Controller 에서 사용하는 의존성을 Service Layer 로 이동
     //     Controller 의 의존성을 AccountService 만을 받게 변경
     private final AccountRepository accountRepository;
-    private final JavaMailSender javaMailSender;
+    //private final JavaMailSender javaMailSender;
+    private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
 
@@ -90,15 +98,19 @@ public class AccountService implements UserDetailsService {
     //TODO 2021.01.09 - 8.회원가입 리팩토링 및 테스트
     //     리팩토링 : 이메일 전송을 담당하는 기능을 추출하여 메소드로 분리
     //     Controller Layer 에서 알고있지 않아도 됨으로 private 접근제어자로 비공개
+    // --------------------------------------------------------------------------------------------
+    //TODO 2021.01.25 47. MimeMessage 전송하기, EmailService 추상화
+    //                 1. EmailService 로 추상화된 객체에 IOC 컨테이너를 통해 구현체를 주입받아 사용
+    //                 2. @Profile("local") 환경과 @Profile("dev") 환경에따라 해당 클라언트 코드를 수정하지
+    //                    않고 사용 가능
     public void sendSignUpConfirmEmail(Account newAccount) {
-        //TODO 이메일 전송
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(newAccount.getEmail()); //TODO 이메일을 받을 사람
-        mailMessage.setSubject("스터디올래, 회원 가입 인증");
-        mailMessage.setText("/check-email-token?token=" + newAccount.getEmailCheckToken() +
+        EmailMessage emailMessage = new EmailMessage();
+        emailMessage.setTo(newAccount.getEmail());
+        emailMessage.setSubject("스터디올래, 회원 가입 인증");
+        emailMessage.setMessage("/check-email-token?token=" + newAccount.getEmailCheckToken() +
                 "&email=" + newAccount.getEmail());
 
-        javaMailSender.send(mailMessage);
+        emailService.sendEmail(emailMessage);
     }
 
     //TODO 2021.01.11 12.회원가입 가입 완료 후 자동 로그인
@@ -257,14 +269,13 @@ public class AccountService implements UserDetailsService {
 
     @Transactional
     public void sendLoginLink(Account account) {
-        //TODO 이메일 전송
-        account.generateEmailCheckToken();
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(account.getEmail()); //TODO 이메일을 받을 사람
-        mailMessage.setSubject("스터디올래, 로그인 링크");
-        mailMessage.setText("/login-by-email?token=" + account.getEmailCheckToken() +
+        EmailMessage emailMessage = new EmailMessage();
+        emailMessage.setTo(account.getEmail());
+        emailMessage.setSubject("스터디올래, 로그인 링크");
+        emailMessage.setMessage("/login-by-email?token=" + account.getEmailCheckToken() +
                 "&email=" + account.getEmail());
-        javaMailSender.send(mailMessage);
+
+        emailService.sendEmail(emailMessage);
     }
 
     //TODO 2021.01.20 37.관심 주제 조회

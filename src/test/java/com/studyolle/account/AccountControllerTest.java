@@ -2,6 +2,8 @@ package com.studyolle.account;
 
 import com.studyolle.account.form.SignUpForm;
 import com.studyolle.domain.Account;
+import com.studyolle.email.EmailMessage;
+import com.studyolle.email.EmailService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -60,8 +62,12 @@ class AccountControllerTest {
     AccountRepository accountRepository;
 
     //TODO 이메일 전송 테스트에 사용 - Mock 객체 사용
+    //TODO 2021.01.25 47. MimeMessage 전송하기, EmailService 추상화
+    //                 1. 기존 javaMailSender 를 MockBean 으로 주입받아 사용하던것을
+    //                    새롭게 만든 EmailService 로 변경하여 테스트 코드에 사용
+    //                  1). @DisplayName("회원 가입 처리 - 입력값 정상") 에서 사용
     @MockBean
-    JavaMailSender javaMailSender;
+    EmailService emailService;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -154,7 +160,7 @@ class AccountControllerTest {
         //     아무런 객체를 넣고 메일이 전송됬는지 확인
         //     JavaMailSender 는 개발자가 인터페이스만 관리하고 외부의 서비스를 이용
         //     그렇기 때문에 Mock 객체를 이용해 테스트
-       then(javaMailSender).should().send(any(SimpleMailMessage.class));
+       then(emailService).should().sendEmail(any(EmailMessage.class));
     }
 
     //TODO 2021.01.10 - 9.회원가입 패스워드 인코딩
