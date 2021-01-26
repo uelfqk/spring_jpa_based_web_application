@@ -36,7 +36,7 @@ public class HtmlEmailService implements EmailService {
 
             //TODO 2021.01.25 47. MimeMessage 전송하기, EmailService 추상화
             //                 1. setText 의 boolean html 이 true 이여야 html 형식으로 이메일 전송
-            mimeMessageHelper.setText(emailMessage.getMessage(), false);
+            mimeMessageHelper.setText(emailMessage.getMessage(), true);
             javaMailSender.send(mimeMessage);
             log.info("send mail : {}" ,emailMessage.getMessage());
         } catch (MessagingException e) {
