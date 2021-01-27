@@ -13,15 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RequiredArgsConstructor
 public class StudyService {
-    private final StudyManagerRepository studyManagerRepository;
     private final StudyRepository studyRepository;
     private final ModelMapper modelMapper;
 
-    public void processNewStudy(Account account, StudyForm studyForm) {
+    public Study createNewStudy(Account account, StudyForm studyForm) {
         Study study = new Study();
         modelMapper.map(studyForm, study);
         StudyManager studyManager = StudyManager.createStudyManager(account);
         study.addStudyManager(studyManager);
-        studyRepository.save(study);
+        return studyRepository.save(study);
     }
 }
