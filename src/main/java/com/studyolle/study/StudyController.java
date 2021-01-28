@@ -5,6 +5,7 @@ import com.studyolle.domain.Account;
 import com.studyolle.domain.Study;
 import com.studyolle.domain.StudyManager;
 import com.studyolle.study.form.StudyForm;
+import com.studyolle.study.form.StudyMembersDto;
 import com.studyolle.study.validator.StudyFormValidator;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -48,13 +49,28 @@ public class StudyController {
         }
 
         Study newStudy = studyService.createNewStudy(account, studyForm);
-        return "redirect:/study" + newStudy.getPath();// + URLEncoder.encode(newStudy.getPath(), "UTF-8");
+        return "redirect:/study/" + newStudy.getPath();// + URLEncoder.encode(newStudy.getPath(), "UTF-8");
     }
 
     @GetMapping("/study/{path}")
     public String viewStudy(@CurrentUser Account account, @PathVariable String path, Model model) {
         model.addAttribute("account", account);
-        model.addAttribute(studyRepository.findByPath(path));
-        return "/study/view";
+
+        Study study = studyRepository.findByPath(path);
+
+        model.addAttribute("study", study);
+
+        return "study/view";
+    }
+
+    @GetMapping("/study/{path}/members")
+    public String showMembers(@CurrentUser Account account, @PathVariable String path , Model model) {
+        model.addAttribute("account", account);
+
+        //Study studyMembersDto = studyRepository.findStudyAndMembersByPath(path);
+
+        StudyMembersDto studyMembersDto = studyService.findMembers(path);
+        model.addAttribute("study", studyMembersDto);
+        return "study/members";
     }
 }

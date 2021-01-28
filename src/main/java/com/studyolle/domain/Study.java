@@ -3,6 +3,7 @@ package com.studyolle.domain;
 import com.studyolle.account.UserAccount;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ public class Study {
     private Long id;
 
     //TODO 스터디 관리자
+    @BatchSize(size = 100)
     @OneToMany(mappedBy = "manager", cascade = CascadeType.PERSIST)
     private List<StudyManager> studyManagers = new ArrayList<>();
 

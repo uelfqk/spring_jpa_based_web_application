@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css" />
     <link rel="stylesheet" href="/node_modules/@yaireo/tagify/dist/tagify.css">
-<!--    <link rel="stylesheet" href="/node_modules/summernote/dist/summernote-bs4.min.css">-->
+    <link rel="stylesheet" href="/node_modules/summernote/dist/summernote-bs4.min.css">
     <script src="/node_modules/jquery/dist/jquery.min.js"></script>
     <script src="/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/node_modules/jdenticon/dist/jdenticon.min.js"></script>
@@ -243,28 +243,28 @@
                   class="d-inline-block ml-1" tabindex="0" data-toggle="tooltip" data-placement="bottom" title="팀원 모집중 아님">
                     <button class="btn btn-primary btn-sm" style="pointer-events: none;" type="button" disabled>OFF</button>
                 </span>
-<!--            <span sec:authorize="isAuthenticated()" th:if="${study.isJoinable(#authentication.principal)}"-->
-<!--                  class="btn-group" role="group" aria-label="Basic example">-->
-<!--                    <a class="btn btn-primary" th:href="@{'/study/' + ${study.path} + '/join'}">-->
-<!--                        스터디 가입-->
-<!--                    </a>-->
-<!--                    <a class="btn btn-outline-primary" th:href="@{'/study/' + ${study.path} + '/members'}"-->
-<!--                       th:text="${study.members.size()}">1</a>-->
-<!--                </span>-->
-<!--            <span sec:authorize="isAuthenticated()"-->
-<!--                  th:if="${!study.closed && study.isMember(#authentication.principal)}" class="btn-group" role="group">-->
-<!--                    <a class="btn btn-outline-warning" th:href="@{'/study/' + ${study.path} + '/leave'}">-->
-<!--                        스터디 탈퇴-->
-<!--                    </a>-->
-<!--                    <a class="btn btn-outline-primary" th:href="@{'/study/' + ${study.path} + '/members'}"-->
-<!--                       th:text="${study.members.size()}">1</a>-->
-<!--                </span>-->
-<!--            <span sec:authorize="isAuthenticated()"-->
-<!--                  th:if="${study.published && !study.closed && study.isManager(#authentication.principal)}">-->
-<!--                    <a class="btn btn-outline-primary" th:href="@{'/study/' + ${study.path} + '/new-event'}">-->
-<!--                        <i class="fa fa-plus"></i> 모임 만들기-->
-<!--                    </a>-->
-<!--            </span>-->
+            <span sec:authorize="isAuthenticated()" th:if="${study.isJoinable(#authentication.principal)}"
+                  class="btn-group" role="group" aria-label="Basic example">
+                    <a class="btn btn-primary" th:href="@{'/study/' + ${study.path} + '/join'}">
+                        스터디 가입
+                    </a>
+                    <a class="btn btn-outline-primary" th:href="@{'/study/' + ${study.path} + '/members'}"
+                       th:text="${study.members.size()}">1</a>
+                </span>
+            <span sec:authorize="isAuthenticated()"
+                  th:if="${!study.closed && study.isMember(#authentication.principal)}" class="btn-group" role="group">
+                    <a class="btn btn-outline-warning" th:href="@{'/study/' + ${study.path} + '/leave'}">
+                        스터디 탈퇴
+                    </a>
+                    <a class="btn btn-outline-primary" th:href="@{'/study/' + ${study.path} + '/members'}"
+                       th:text="${study.members.size()}">1</a>
+                </span>
+            <span sec:authorize="isAuthenticated()"
+                  th:if="${study.published && !study.closed && study.isManager(#authentication.principal)}">
+                    <a class="btn btn-outline-primary" th:href="@{'/study/' + ${study.path} + '/new-event'}">
+                        <i class="fa fa-plus"></i> 모임 만들기
+                    </a>
+            </span>
         </div>
     </div>
     <div class="row justify-content-center bg-light">
@@ -275,13 +275,13 @@
     <div class="row justify-content-center bg-light">
         <div class="col-10">
             <p>
-                <span th:each="tag: ${study.studyTags.tag}"
+                <span th:each="tag: ${study.tags}"
                       class="font-weight-light text-monospace badge badge-pill badge-info mr-3">
                     <a th:href="@{'/search/tag/' + ${tag.title}}" class="text-decoration-none text-white">
                         <i class="fa fa-tag"></i> <span th:text="${tag.title}">Tag</span>
                     </a>
                 </span>
-                <span th:each="zone: ${study.studyZones.zone}" class="font-weight-light text-monospace badge badge-primary mr-3">
+                <span th:each="zone: ${study.zones}" class="font-weight-light text-monospace badge badge-primary mr-3">
                     <a th:href="@{'/search/zone/' + ${zone.id}}" class="text-decoration-none text-white">
                         <i class="fa fa-globe"></i> <span th:text="${zone.localNameOfCity}">City</span>
                     </a>

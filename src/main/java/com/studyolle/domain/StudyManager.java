@@ -16,12 +16,12 @@ public class StudyManager {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id")
-    private Account manager;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "study_id")
     private Study study;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id")
+    private Account manager;
 
     public static StudyManager createStudyManager(Account manager) {
         StudyManager studyManager = new StudyManager();
