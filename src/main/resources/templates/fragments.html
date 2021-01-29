@@ -230,11 +230,11 @@
             </a>
         </div>
         <div class="col-4 text-right justify-content-end">
-                <span th:if="${!study.published}"
-                      class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="bottom"
-                      title="스터디 공개 준비중">
-                    <button class="btn btn-primary btn-sm" style="pointer-events: none;" type="button" disabled>DRAFT</button>
-                </span>
+            <span th:if="${!study.published}"
+                  class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="bottom"
+                  title="스터디 공개 준비중">
+                <button class="btn btn-primary btn-sm" style="pointer-events: none;" type="button" disabled>DRAFT</button>
+            </span>
             <span th:if="${study.closed}"
                   class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="bottom" title="스터디 종료함">
                     <button class="btn btn-primary btn-sm" style="pointer-events: none;" type="button" disabled>CLOSED</button>
@@ -264,7 +264,7 @@
                     <a class="btn btn-outline-primary" th:href="@{'/study/' + ${study.path} + '/new-event'}">
                         <i class="fa fa-plus"></i> 모임 만들기
                     </a>
-                </span>
+            </span>
         </div>
     </div>
     <div class="row justify-content-center bg-light">
