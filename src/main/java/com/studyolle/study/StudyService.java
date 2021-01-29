@@ -3,7 +3,6 @@ package com.studyolle.study;
 import com.studyolle.domain.Account;
 import com.studyolle.domain.Study;
 import com.studyolle.domain.StudyManager;
-import com.studyolle.domain.StudyMember;
 import com.studyolle.study.form.StudyForm;
 import com.studyolle.study.form.StudyMembersDto;
 import lombok.RequiredArgsConstructor;
@@ -31,19 +30,19 @@ public class StudyService {
     }
 
     public StudyMembersDto findMembers(String path) {
-
         StudyMembersDto studyMembersDto = new StudyMembersDto();
         // 스터디 찾고  일
         Study study = studyRepository.findByPath(path);
         // 매니저 찾고  다
-        List<Account> managers = studyRepository.findManagers(study.getId()).stream()
+        List<Account> managers = studyRepository.findStudyManagersByStudyId(study.getId()).stream()
                 .map(r -> r.getManager())
                 .collect(Collectors.toList());
         // 맴버 찾고    다
-        List<Account> members = studyRepository.findMembers(study.getId()).stream()
-                .map(r -> r.getMember())
+        List<Account> members = studyRepository.findStudyManagersByStudyId(study.getId()).stream()
+                .map(r -> r.getManager())
                 .collect(Collectors.toList());
         // 지역정보 찾고 다
+
         // 태그정보 찾고 다
 
         studyMembersDto.setPath(path);

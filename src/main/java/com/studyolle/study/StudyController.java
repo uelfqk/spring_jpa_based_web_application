@@ -4,6 +4,7 @@ import com.studyolle.account.CurrentUser;
 import com.studyolle.domain.Account;
 import com.studyolle.domain.Study;
 import com.studyolle.domain.StudyManager;
+import com.studyolle.study.form.StudyDescriptionForm;
 import com.studyolle.study.form.StudyForm;
 import com.studyolle.study.form.StudyMembersDto;
 import com.studyolle.study.validator.StudyFormValidator;
@@ -66,8 +67,6 @@ public class StudyController {
     @GetMapping("/study/{path}/members")
     public String showMembers(@CurrentUser Account account, @PathVariable String path , Model model) {
         model.addAttribute("account", account);
-
-        //Study studyMembersDto = studyRepository.findStudyAndMembersByPath(path);
 
         StudyMembersDto studyMembersDto = studyService.findMembers(path);
         model.addAttribute("study", studyMembersDto);

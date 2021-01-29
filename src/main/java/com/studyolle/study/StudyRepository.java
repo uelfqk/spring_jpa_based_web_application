@@ -3,6 +3,7 @@ package com.studyolle.study;
 import com.studyolle.domain.Study;
 import com.studyolle.domain.StudyManager;
 import com.studyolle.domain.StudyMember;
+import com.studyolle.domain.StudyTag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,11 +28,17 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
             "join fetch sm.study s " +
             "join fetch sm.member " +
             "where s.id = :studyId")
-    List<StudyMember> findMembers(@Param("studyId") Long studyId);
+    List<StudyMember> findStudyMembersByStudyId(@Param("studyId") Long studyId);
 
     @Query("select sm from StudyManager sm " +
-            "join fetch sm.study s " +
             "join fetch sm.manager " +
+            "join fetch sm.study s " +
             "where s.id = :studyId")
-    List<StudyManager> findManagers(@Param("studyId") Long studyId);
+    List<StudyManager> findStudyManagersByStudyId(@Param("studyId") Long studyId);
+
+//    @Query("select st from StudyTag st " +
+//            "join fetch st.tag t" +
+//            "join fetch st.study s " +
+//            "where s.id = :studyId")
+//    List<StudyTag> findStudyTagsByStudyId(@Param("studyId") Long studyId);
 }
