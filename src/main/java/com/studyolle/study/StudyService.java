@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RequiredArgsConstructor
 public class StudyService {
-    private final StudyManagerRepository studyManagerRepository;
     private final StudyRepository studyRepository;
     private final ModelMapper modelMapper;
 
