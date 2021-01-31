@@ -55,7 +55,7 @@ public class Account {
     private String location;
 
     //TODO 프로필 이미지 - 유저를 로딩할때 거의 같이 사용할 것이라 EAGER 설정 -> 나중에 LAZY 로 변경해서 해보기
-    @Lob @Basic(fetch = FetchType.LAZY)
+    @Lob //@Basic(fetch = FetchType.LAZY)
     private String profileImage;
 
     //TODO 스터디 생성 결과를 이메일로 받을지 여부
@@ -170,5 +170,36 @@ public class Account {
                 ", nickname='" + nickname + '\'' +
                 ", password='" + password + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Account account = (Account) o;
+        return isEmailVerified() == account.isEmailVerified() &&
+                isStudyCreatedByEmail() == account.isStudyCreatedByEmail() &&
+                isStudyCreatedByWeb() == account.isStudyCreatedByWeb() &&
+                isStudyEnrollmentResultByEmail() == account.isStudyEnrollmentResultByEmail() &&
+                isStudyEnrollmentResultByWeb() == account.isStudyEnrollmentResultByWeb() &&
+                isStudyUpdatedByEmail() == account.isStudyUpdatedByEmail() &&
+                isStudyUpdatedByWeb() == account.isStudyUpdatedByWeb() &&
+                Objects.equals(getId(), account.getId()) &&
+                Objects.equals(getEmail(), account.getEmail()) &&
+                Objects.equals(getNickname(), account.getNickname()) &&
+                Objects.equals(getPassword(), account.getPassword()) &&
+                Objects.equals(getEmailCheckToken(), account.getEmailCheckToken()) &&
+                Objects.equals(getJoinedAt(), account.getJoinedAt()) &&
+                Objects.equals(getBio(), account.getBio()) &&
+                Objects.equals(getUrl(), account.getUrl()) &&
+                Objects.equals(getOccupation(), account.getOccupation()) &&
+                Objects.equals(getLocation(), account.getLocation()) &&
+                Objects.equals(getProfileImage(), account.getProfileImage()) &&
+                Objects.equals(getEmailCheckTokenGeneratedAt(), account.getEmailCheckTokenGeneratedAt());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getEmail(), getNickname(), getPassword(), isEmailVerified(), getEmailCheckToken(), getJoinedAt(), getBio(), getUrl(), getOccupation(), getLocation(), getProfileImage(), isStudyCreatedByEmail(), isStudyCreatedByWeb(), isStudyEnrollmentResultByEmail(), isStudyEnrollmentResultByWeb(), isStudyUpdatedByEmail(), isStudyUpdatedByWeb(), getEmailCheckTokenGeneratedAt());
     }
 }

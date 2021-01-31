@@ -20,13 +20,15 @@ public class Study {
     private Long id;
 
     //TODO 스터디 관리자
-    @BatchSize(size = 100)
-    @OneToMany(mappedBy = "manager", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "study", cascade = CascadeType.ALL)
     private List<StudyManager> studyManagers = new ArrayList<>();
 
     //TODO 스터디 참여 계정
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "study")
     private List<StudyMember> studyMembers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "study")
+    private List<StudyAccount> studyAccounts = new ArrayList<>();
 
     //TODO 스터디 url path
     @Column(unique = true)
@@ -76,8 +78,13 @@ public class Study {
     private boolean useBanner;
 
     public void addStudyManager(StudyManager studyManager) {
-        this.getStudyManagers().add(studyManager);
+        this.studyManagers.add(studyManager);
         studyManager.setStudy(this);
+    }
+
+    public void addStudyMember(StudyMember studyMember) {
+        this.studyMembers.add(studyMember);
+        studyMember.setStudy(this);
     }
 
     //TODO 2021.01.27 52. 스터디 조회
@@ -113,6 +120,17 @@ public class Study {
     //                   -. 해당 스터디가 공개 되었고
     //                   -. 해당 스터디가 종료 되지 않았고
     public boolean isManager(UserAccount userAccount) {
-        return this.studyManagers.contains(userAccount.getAccount());
+        for (StudyAccount studyAccount : studyAccounts) {
+            if(studyAccount.isManager(userAccount.getAccount())) {
+                return true;
+            }
+        }
+        return false;
+//        for (StudyManager studyManager : studyManagers) {
+//            if(studyManager.isManager(userAccount.getAccount())) {
+//                return true;
+//            }
+//        }
+//        return false;
     }
 }

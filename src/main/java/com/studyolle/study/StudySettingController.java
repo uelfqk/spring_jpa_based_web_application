@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
@@ -24,10 +25,26 @@ public class StudySettingController {
 
     @GetMapping("/description")
     public String showSettings(@CurrentUser Account account, @PathVariable String path, Model model) {
-        StudyMembersDto study = studyService.findMembers(path);
+        Study study = studyService.getStudyToUpdate(account, path);
         model.addAttribute("account", account);
         model.addAttribute("study", study);
         model.addAttribute("studyDescriptionForm", modelMapper.map(study, StudyDescriptionForm.class));
         return "study/settings/description";
+    }
+
+    @PostMapping("/description")
+    public String updateStudyDescription() {
+
+        return "redirect:/study/settings/description";
+    }
+
+    @GetMapping("/study")
+    public String showStudy(@CurrentUser Account account, @PathVariable String path, Model model) {
+        Study study = studyService.getStudyToUpdate(account, path);
+
+        model.addAttribute("account", account);
+        model.addAttribute("study", study);
+
+        return "study/settings/study";
     }
 }

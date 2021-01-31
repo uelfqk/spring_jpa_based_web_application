@@ -10,9 +10,10 @@ import javax.persistence.*;
 @Entity
 @Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class StudyManager {
+public class StudyAccount {
+
     @Id @GeneratedValue
-    @Column(name = "study_manager_id")
+    @Column(name = "study_account_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -21,15 +22,15 @@ public class StudyManager {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
-    private Account manager;
+    private Account account;
 
     public boolean isManager(Account account) {
-        return this.manager.equals(account);
+        return this.account.equals(account);
     }
 
-    public static StudyManager createStudyManager(Account manager) {
-        StudyManager studyManager = new StudyManager();
-        studyManager.setManager(manager);
-        return studyManager;
+    public static StudyAccount createStudyAccount(Account account) {
+        StudyAccount studyAccount = new StudyAccount();
+        studyAccount.setAccount(account);
+        return studyAccount;
     }
 }

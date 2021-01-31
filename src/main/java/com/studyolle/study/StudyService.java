@@ -3,15 +3,19 @@ package com.studyolle.study;
 import com.studyolle.domain.Account;
 import com.studyolle.domain.Study;
 import com.studyolle.domain.StudyManager;
+import com.studyolle.study.form.StudyDescriptionForm;
 import com.studyolle.study.form.StudyForm;
 import com.studyolle.study.form.StudyMembersDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,6 +25,8 @@ public class StudyService {
     private final StudyRepository studyRepository;
     private final ModelMapper modelMapper;
 
+    private final EntityManager em;
+
     public Study createNewStudy(Account account, StudyForm studyForm) {
         Study study = new Study();
         modelMapper.map(studyForm, study);
@@ -29,34 +35,29 @@ public class StudyService {
         return studyRepository.save(study);
     }
 
-    public StudyMembersDto findMembers(String path) {
-        StudyMembersDto studyMembersDto = new StudyMembersDto();
-        // 스터디 찾고  일
+    public Study getStudyToUpdate(Account account, String path) {
+        Study study = this.getStudy(path);
+//        if(account.isManagerOf(study)) {
+//            throw new AccessDeniedException("해당 기능을 사용할 수 없습니다.");
+//        }
+        return study;
+    }
+
+    private Study getStudy(String path) {
         Study study = studyRepository.findByPath(path);
-        // 매니저 찾고  다
-        List<Account> managers = studyRepository.findStudyManagersByStudyId(study.getId()).stream()
-                .map(r -> r.getManager())
-                .collect(Collectors.toList());
-        // 맴버 찾고    다
-        List<Account> members = studyRepository.findStudyManagersByStudyId(study.getId()).stream()
-                .map(r -> r.getManager())
-                .collect(Collectors.toList());
-        // 지역정보 찾고 다
+        if(study == null) {
+            throw new IllegalArgumentException(path + " 에 해당하는 스터디가 없습니다.");
+        }
+        return study;
+    }
 
-        // 태그정보 찾고 다
+    public Study findMembers(String path) {
+        return studyRepository.findStudyAccountsByPath(path);
 
-        studyMembersDto.setPath(path);
-        studyMembersDto.setTitle(study.getTitle());
-        studyMembersDto.setPublished(study.isPublished());
-        studyMembersDto.setClosed(study.isClosed());
-        studyMembersDto.setRecruiting(study.isRecruiting());
-        studyMembersDto.setShortDescription(study.getShortDescription());
-        studyMembersDto.setFullDescription(study.getFullDescription());
-        studyMembersDto.setTags(new ArrayList<>());
-        studyMembersDto.setZones(new ArrayList<>());
-        studyMembersDto.setManagers(managers);
-        studyMembersDto.setMembers(members);
+//        return studyRepository.findStudyAndMembersByPath(path);
+    }
 
-        return studyMembersDto;
+    public void updateToDescription(Study study, StudyDescriptionForm studyDescriptionForm) {
+        modelMapper.map(study, studyDescriptionForm);
     }
 }

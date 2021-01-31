@@ -17,6 +17,17 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
 
     Study findByPath(String path);
 
+    @Query("select sm from StudyMember sm " +
+            "join fetch sm.study s " +
+            "join fetch sm.member " +
+            "where s.id = :studyId")
+    List<StudyMember> findStudyMembersByStudyId(@Param("studyId") Long studyId);
+
+    @Query("select s from Study s " +
+            "left outer join fetch s.studyManagers sm " +
+            "left outer join fetch sm.manager m " +
+            "where path = :path")
+    Study findStudyAndManagersByPath(@Param("path") String path);
 
     @Query("select s from Study s " +
             "left outer join fetch s.studyMembers sm " +
@@ -24,17 +35,17 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
             "where path = :path")
     Study findStudyAndMembersByPath(@Param("path") String path);
 
-    @Query("select sm from StudyMember sm " +
-            "join fetch sm.study s " +
-            "join fetch sm.member " +
-            "where s.id = :studyId")
-    List<StudyMember> findStudyMembersByStudyId(@Param("studyId") Long studyId);
-
     @Query("select sm from StudyManager sm " +
             "join fetch sm.manager " +
             "join fetch sm.study s " +
             "where s.id = :studyId")
     List<StudyManager> findStudyManagersByStudyId(@Param("studyId") Long studyId);
+
+    @Query("select s from Study s " +
+            "join fetch s.studyAccounts sa " +
+            "join fetch sa.account " +
+            "where s.path = :path")
+    Study findStudyAccountsByPath(@Param("path") String path);
 
 //    @Query("select st from StudyTag st " +
 //            "join fetch st.tag t" +

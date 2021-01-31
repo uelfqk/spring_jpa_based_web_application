@@ -55,10 +55,9 @@ public class StudyController {
 
     @GetMapping("/study/{path}")
     public String viewStudy(@CurrentUser Account account, @PathVariable String path, Model model) {
+        Study study = studyService.getStudyToUpdate(account, path);
+
         model.addAttribute("account", account);
-
-        Study study = studyRepository.findByPath(path);
-
         model.addAttribute("study", study);
 
         return "study/view";
@@ -66,10 +65,11 @@ public class StudyController {
 
     @GetMapping("/study/{path}/members")
     public String showMembers(@CurrentUser Account account, @PathVariable String path , Model model) {
-        model.addAttribute("account", account);
+        Study study = studyService.findMembers(path);
 
-        StudyMembersDto studyMembersDto = studyService.findMembers(path);
-        model.addAttribute("study", studyMembersDto);
+        model.addAttribute("account", account);
+        model.addAttribute("study", study);
+
         return "study/members";
     }
 }
