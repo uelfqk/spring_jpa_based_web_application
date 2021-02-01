@@ -6,6 +6,9 @@ import lombok.Setter;
 import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +30,7 @@ public class Study {
     @OneToMany(mappedBy = "study")
     private List<StudyMember> studyMembers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "study")
+    @OneToMany(mappedBy = "study", cascade = CascadeType.PERSIST)
     private List<StudyAccount> studyAccounts = new ArrayList<>();
 
     //TODO 스터디 url path
@@ -49,11 +52,11 @@ public class Study {
     private String image;
 
     //TODO 스터디에 등록된 태그 정보
-    @OneToMany
+    @OneToMany(mappedBy = "study", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<StudyTag> studyTags = new ArrayList<>();
 
     //TODO 스터디에 등록된 지역 정보
-    @OneToMany
+    @OneToMany(mappedBy = "study", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<StudyZone> studyZones = new ArrayList<>();
 
     //TODO 스터디 게시 일자
@@ -85,6 +88,11 @@ public class Study {
     public void addStudyMember(StudyMember studyMember) {
         this.studyMembers.add(studyMember);
         studyMember.setStudy(this);
+    }
+
+    public void addStudyAccount(StudyAccount studyAccount) {
+        this.studyAccounts.add(studyAccount);
+        studyAccount.setStudy(this);
     }
 
     //TODO 2021.01.27 52. 스터디 조회
@@ -126,11 +134,31 @@ public class Study {
             }
         }
         return false;
-//        for (StudyManager studyManager : studyManagers) {
-//            if(studyManager.isManager(userAccount.getAccount())) {
-//                return true;
-//            }
-//        }
-//        return false;
+    }
+
+    public String getEncodingPath() throws UnsupportedEncodingException {
+        return URLEncoder.encode(this.path, String.valueOf(StandardCharsets.UTF_8));
+    }
+
+    public void addStudyTag(StudyTag studyTag) {
+        this.studyTags.add(studyTag);
+        studyTag.setStudy(this);
+    }
+
+    public void removeStudyTag(Tag tag) {
+        studyTags.removeIf(at -> at.getTag().equals(tag));
+    }
+
+    public void addStudyZone(StudyZone studyZone) {
+        this.studyZones.add(studyZone);
+        studyZone.setStudy(this);
+    }
+
+    public void removeStudyZone(Zone zone) {
+        studyZones.removeIf(z -> z.getZone().equals(zone));
+    }
+
+    public boolean isRemovable() {
+        return isPublished() && isRecruiting();
     }
 }

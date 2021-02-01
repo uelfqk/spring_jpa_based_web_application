@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.util.Objects;
 
 @Entity
 @Getter @Setter
@@ -31,6 +32,22 @@ public class Zone {
         zone.setLocalNameOfCity(localNameOfCity);
         zone.setProvince(province);
         return zone;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Zone zone = (Zone) o;
+        return Objects.equals(getId(), zone.getId()) &&
+                Objects.equals(getCity(), zone.getCity()) &&
+                Objects.equals(getLocalNameOfCity(), zone.getLocalNameOfCity()) &&
+                Objects.equals(getProvince(), zone.getProvince());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getCity(), getLocalNameOfCity(), getProvince());
     }
 
     @Override

@@ -23,14 +23,8 @@ public class StudyTag {
     @JoinColumn(name = "tag_id")
     private Tag tag;
 
-    private void setStudy(Study study) {
-        this.study = study;
-        study.getStudyTags().add(this);
-    }
-
     public static StudyTag createStudyTag(Study study, Tag tag) {
         StudyTag studyTag = new StudyTag();
-        studyTag.setStudy(study);
         studyTag.setTag(tag);
         return studyTag;
     }

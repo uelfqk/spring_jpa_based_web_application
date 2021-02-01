@@ -23,11 +23,6 @@ public class StudyZone {
     @JoinColumn(name = "zone_id")
     private Zone zone;
 
-    private void setStudy(Study study) {
-        this.study = study;
-        study.getStudyZones().add(this);
-    }
-
     public static StudyZone createStudyZone(Study study, Zone zone) {
         StudyZone studyZone = new StudyZone();
         studyZone.setStudy(study);

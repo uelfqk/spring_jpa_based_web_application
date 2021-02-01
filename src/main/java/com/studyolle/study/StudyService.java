@@ -1,8 +1,6 @@
 package com.studyolle.study;
 
-import com.studyolle.domain.Account;
-import com.studyolle.domain.Study;
-import com.studyolle.domain.StudyManager;
+import com.studyolle.domain.*;
 import com.studyolle.study.form.StudyDescriptionForm;
 import com.studyolle.study.form.StudyForm;
 import com.studyolle.study.form.StudyMembersDto;
@@ -28,10 +26,11 @@ public class StudyService {
     private final EntityManager em;
 
     public Study createNewStudy(Account account, StudyForm studyForm) {
-        Study study = new Study();
-        modelMapper.map(studyForm, study);
-        StudyManager studyManager = StudyManager.createStudyManager(account);
-        study.addStudyManager(studyManager);
+        Study study = modelMapper.map(studyForm, Study.class);
+
+        StudyAccount studyAccount = StudyAccount.createStudyAccount(account);
+        study.addStudyAccount(studyAccount);
+
         return studyRepository.save(study);
     }
 
@@ -59,5 +58,51 @@ public class StudyService {
 
     public void updateToDescription(Study study, StudyDescriptionForm studyDescriptionForm) {
         modelMapper.map(study, studyDescriptionForm);
+    }
+
+    public Study enableBannerImage(String path) {
+        Study study = studyRepository.findByPath(path);
+        study.setUseBanner(true);
+
+        return study;
+    }
+
+    public Study disableBannerImage(String path) {
+        Study study = studyRepository.findByPath(path);
+        study.setUseBanner(false);
+
+        return study;
+    }
+
+    public Study updateBannerImage(String path, String image) {
+        Study study = getStudy(path);
+        study.setImage(image);
+        return study;
+    }
+
+    public void addTag(String path, Tag tag) {
+        Study study = studyRepository.findStudyTagsByPath(path);
+
+        StudyTag studyTag = StudyTag.createStudyTag(study, tag);
+        study.addStudyTag(studyTag);
+    }
+
+    public void removeTag(String path, Tag tag) {
+        Study study = studyRepository.findStudyTagsByPath(path);
+
+        study.removeStudyTag(tag);
+    }
+
+    public void addZone(String path, Zone zone) {
+        Study study = studyRepository.findStudyZonesByPath(path);
+
+        StudyZone studyZone = StudyZone.createStudyZone(study, zone);
+        study.addStudyZone(studyZone);
+    }
+
+    public void removeZone(String path, Zone zone) {
+        Study study = studyRepository.findStudyZonesByPath(path);
+
+        study.removeStudyZone(zone);
     }
 }

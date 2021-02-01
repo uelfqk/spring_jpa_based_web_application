@@ -275,15 +275,15 @@
     <div class="row justify-content-center bg-light">
         <div class="col-10">
             <p>
-                <span th:each="tag: ${study.studyTags}"
+                <span th:each="studyTag: ${study.studyTags}"
                       class="font-weight-light text-monospace badge badge-pill badge-info mr-3">
-                    <a th:href="@{'/search/tag/' + ${tag.title}}" class="text-decoration-none text-white">
-                        <i class="fa fa-tag"></i> <span th:text="${tag.title}">Tag</span>
+                    <a th:href="@{'/search/tag/' + ${studyTag.tag.title}}" class="text-decoration-none text-white">
+                        <i class="fa fa-tag"></i> <span th:text="${studyTag.tag.title}">Tag</span>
                     </a>
                 </span>
-                <span th:each="zone: ${study.studyZones}" class="font-weight-light text-monospace badge badge-primary mr-3">
-                    <a th:href="@{'/search/zone/' + ${zone.id}}" class="text-decoration-none text-white">
-                        <i class="fa fa-globe"></i> <span th:text="${zone.localNameOfCity}">City</span>
+                <span th:each="studyZone: ${study.studyZones}" class="font-weight-light text-monospace badge badge-primary mr-3">
+                    <a th:href="@{'/search/zone/' + ${studyZone.zone.id}}" class="text-decoration-none text-white">
+                        <i class="fa fa-globe"></i> <span th:text="${studyZone.zone.localNameOfCity}">City</span>
                     </a>
                 </span>
             </p>
