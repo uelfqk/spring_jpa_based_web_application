@@ -43,7 +43,7 @@ public class StudyController {
 
     @PostMapping("/new-study")
     public String createStudy(@Valid @ModelAttribute StudyForm studyForm, Errors errors,
-                              @CurrentUser Account account, Model model, RedirectAttributes attributes) throws UnsupportedEncodingException {
+                              @CurrentUser Account account, Model model, RedirectAttributes attributes) {
         if(errors.hasErrors()) {
             model.addAttribute("account", account);
             return "study/form";

@@ -16,9 +16,9 @@ public class StudyDescriptionForm {
     private String path;
 
     //TODO 스터디 제목
-    @NotBlank
-    @Length(max = 50)
-    private String title;
+    //@NotBlank
+    //@Length(max = 50)
+    //private String title;
 
     //TODO 스터디 짧은 소개
     @NotBlank

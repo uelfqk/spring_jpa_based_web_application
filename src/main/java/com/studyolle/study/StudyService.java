@@ -57,7 +57,7 @@ public class StudyService {
     }
 
     public void updateToDescription(Study study, StudyDescriptionForm studyDescriptionForm) {
-        modelMapper.map(study, studyDescriptionForm);
+        modelMapper.map(studyDescriptionForm, study);
     }
 
     public Study enableBannerImage(String path) {

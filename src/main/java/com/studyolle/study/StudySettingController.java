@@ -18,9 +18,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.validation.Valid;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -48,9 +50,19 @@ public class StudySettingController {
     }
 
     @PostMapping("/description")
-    public String updateStudyDescription() {
+    public String updateStudyDescription(@CurrentUser Account account, @PathVariable String path,
+                                         @Valid @ModelAttribute StudyDescriptionForm studyDescriptionForm,
+                                         Errors errors, Model model) {
+        Study study = studyRepository.findByPath(path);
 
-        return "redirect:/study/settings/description";
+        if(errors.hasErrors()) {
+            model.addAttribute("account", account);
+            model.addAttribute("study", study);
+            return "study/settings/description";
+        }
+
+        studyService.updateToDescription(study, studyDescriptionForm);
+        return "redirect:/study/"+ study.getPath() +"/settings/description";
     }
 
     @GetMapping("/banner")
