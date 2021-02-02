@@ -4,11 +4,14 @@ import com.studyolle.domain.Study;
 import com.studyolle.domain.StudyManager;
 import com.studyolle.domain.StudyMember;
 import com.studyolle.domain.StudyTag;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedEntityGraphs;
 import java.util.List;
 
 @Transactional(readOnly = true)

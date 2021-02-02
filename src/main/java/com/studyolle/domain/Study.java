@@ -30,7 +30,7 @@ public class Study {
     @OneToMany(mappedBy = "study")
     private List<StudyMember> studyMembers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "study", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "study", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<StudyAccount> studyAccounts = new ArrayList<>();
 
     //TODO 스터디 url path
