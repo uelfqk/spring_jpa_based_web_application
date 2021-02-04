@@ -94,7 +94,6 @@ class StudySettingControllerTest {
 
         assertThat(form).isNotNull();
         assertThat(form.getPath()).isEqualTo("study");
-        //assertThat(form.getTitle()).isEqualTo("title");
         assertThat(form.getShortDescription()).isEqualTo("short");
         assertThat(form.getFullDescription()).isEqualTo("full");
     }
