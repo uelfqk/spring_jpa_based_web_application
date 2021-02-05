@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -102,7 +103,22 @@ public class StudyService {
 
     public void removeZone(String path, Zone zone) {
         Study study = studyRepository.findStudyZonesByPath(path);
-
         study.removeStudyZone(zone);
+    }
+
+    public void publishStudy(Study study) {
+        study.publish();
+    }
+
+    public void closeStudy(Study study) {
+        study.close();
+    }
+
+    public void startRecruit(Study study) {
+        study.startRecruit();
+    }
+
+    public void stopRecruit(Study study) {
+        study.stopRecruit();
     }
 }

@@ -7,7 +7,7 @@ import com.studyolle.account.CurrentUser;
 import com.studyolle.domain.Account;
 import com.studyolle.domain.Tag;
 import com.studyolle.domain.Zone;
-import com.studyolle.repository.TagRepository;
+import com.studyolle.tag.TagRepository;
 import com.studyolle.zone.ZoneRepository;
 import com.studyolle.settings.form.*;
 import com.studyolle.settings.validator.NicknameFormValidator;

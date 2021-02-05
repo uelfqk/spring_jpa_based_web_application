@@ -40,4 +40,10 @@ public class ZoneService {
             zoneRepository.saveAll(result);
         }
     }
+
+    public List<String> getZoneWhiteList() {
+        return zoneRepository.findAll().stream()
+                .map(z -> z.toString())
+                .collect(Collectors.toList());
+    }
 }

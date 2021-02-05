@@ -7,12 +7,13 @@ import com.studyolle.domain.Account;
 import com.studyolle.domain.Study;
 import com.studyolle.domain.Tag;
 import com.studyolle.domain.Zone;
-import com.studyolle.repository.TagRepository;
+import com.studyolle.tag.TagRepository;
 import com.studyolle.study.form.StudyDescriptionForm;
-import com.studyolle.study.form.StudyMembersDto;
 import com.studyolle.study.form.TagForm;
 import com.studyolle.study.form.ZoneForm;
+import com.studyolle.tag.TagService;
 import com.studyolle.zone.ZoneRepository;
+import com.studyolle.zone.ZoneService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +25,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +38,9 @@ public class StudySettingController {
     private final TagRepository tagRepository;
     private final ObjectMapper objectMapper;
     private final ZoneRepository zoneRepository;
+
+    private final TagService tagService;
+    private final ZoneService zoneService;
 
     @GetMapping("/description")
     public String showSettings(@CurrentUser Account account, @PathVariable String path, Model model) {
@@ -99,9 +101,7 @@ public class StudySettingController {
     public String viewTags(@CurrentUser Account account, @PathVariable String path, Model model) throws JsonProcessingException {
         Study study = studyRepository.findStudyTagsByPath(path);
 
-        List<Tag> allTag = tagRepository.findAll();
-
-        List<String> whitelist = allTag.stream().map(t -> t.getTitle()).collect(Collectors.toList());
+        List<String> whitelist = tagService.getTagWhiteList();
 
         List<String> tags = study.getStudyTags().stream().map(t -> t.getTag().getTitle())
                 .collect(Collectors.toList());
@@ -120,14 +120,9 @@ public class StudySettingController {
                                   @RequestBody TagForm tagForm) {
         String tagTitle = tagForm.getTagTitle();
 
-        Tag tag = tagRepository.findByTitle(tagTitle);
-
-        if (tag == null) {
-            tag = tagRepository.save(Tag.createTag(tagTitle));
-        }
+        Tag tag = tagService.getTag(tagTitle);
 
         studyService.addTag(path, tag);
-
 
         return ResponseEntity.ok().build();
     }
@@ -158,10 +153,7 @@ public class StudySettingController {
                 .map(z -> z.getZone().toString())
                 .collect(Collectors.toList());
 
-        List<String> whitelist = zoneRepository.findAll().stream()
-                .map(z -> z.toString())
-                .collect(Collectors.toList());
-
+        List<String> whitelist = zoneService.getZoneWhiteList();
 
         model.addAttribute("account", account);
         model.addAttribute("study", study);
@@ -178,8 +170,7 @@ public class StudySettingController {
 
         Zone zone = zoneRepository.findByCityAndProvince(zoneForm.getCity(), zoneForm.getProvince());
         if(zone == null) {
-            zone = zoneRepository.save(Zone.createZone(zoneForm.getCity(),
-                    zoneForm.getLocalNameOfCity(), zoneForm.getProvince()));
+            ResponseEntity.badRequest().build();
         }
 
         studyService.addZone(path, zone);
@@ -189,7 +180,7 @@ public class StudySettingController {
 
     @PostMapping("zones/remove")
     public ResponseEntity removeZone(@CurrentUser Account account, @PathVariable String path,
-                             @RequestBody ZoneForm zoneForm) {
+                                     @RequestBody ZoneForm zoneForm) {
         Zone zone = zoneRepository.findByCityAndProvince(zoneForm.getCity(), zoneForm.getProvince());
 
         if(zone == null) {
@@ -204,10 +195,64 @@ public class StudySettingController {
     @GetMapping("/study")
     public String showStudy(@CurrentUser Account account, @PathVariable String path, Model model) {
         Study study = studyService.getStudyToUpdate(account, path);
-
         model.addAttribute("account", account);
         model.addAttribute("study", study);
-
         return "study/settings/study";
+    }
+
+    @PostMapping("/study/publish")
+    public String publishStudy(@CurrentUser Account account, @PathVariable String path,
+                               RedirectAttributes attributes) throws UnsupportedEncodingException {
+        Study study = studyService.getStudyToUpdate(account, path);
+        studyService.publishStudy(study);
+        attributes.addFlashAttribute("message", "스터디를 공개하였습니다.");
+        return getSettingsStudyReturn(study.getEncodingPath());
+    }
+
+    @PostMapping("/study/close")
+    public String closeStudy(@CurrentUser Account account, @PathVariable String path,
+                             RedirectAttributes attributes) throws UnsupportedEncodingException {
+        Study study = studyService.getStudyToUpdate(account, path);
+        studyService.closeStudy(study);
+        attributes.addFlashAttribute("message", "스터디를 종료하였습니다.");
+        return getSettingsStudyReturn(study.getEncodingPath());
+    }
+
+    @PostMapping("/recruit/start")
+    public String startRecruitStudy(@CurrentUser Account account, @PathVariable String path,
+                                    Model model, RedirectAttributes attributes) throws UnsupportedEncodingException {
+        Study study = studyRepository.findByPath(path);
+
+        if(!study.canRecruiting()) {
+            model.addAttribute("account", account);
+            model.addAttribute("study", study);
+            model.addAttribute("message", "1시간 안에 인원 모집 설정을 여러번 변경할 수 없습니다.");
+            return "study/settings/study";
+        }
+
+        studyService.startRecruit(study);
+        attributes.addFlashAttribute("message", "스터디 인원 모집을 시작했습니다.");
+        return getSettingsStudyReturn(study.getEncodingPath());
+    }
+
+    @PostMapping("/recruit/stop")
+    public String stopRecruitStudy(@CurrentUser Account account, @PathVariable String path,
+                                   Model model, RedirectAttributes attributes) throws UnsupportedEncodingException {
+        Study study = studyRepository.findByPath(path);
+
+        if(!study.canRecruiting()) {
+            model.addAttribute("account", account);
+            model.addAttribute("study", study);
+            model.addAttribute("message", "1시간 안에 인원 모집 설정을 여러번 변경할 수 없습니다.");
+            return "study/settings/study";
+        }
+
+        studyService.stopRecruit(study);
+        attributes.addFlashAttribute("message", "스터디 인원 모집을 종료했습니다.");
+        return getSettingsStudyReturn(study.getEncodingPath());
+    }
+
+    private String getSettingsStudyReturn(String path) {
+        return "redirect:/study/" + path + "/settings/study";
     }
 }

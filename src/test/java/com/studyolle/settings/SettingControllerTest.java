@@ -8,11 +8,10 @@ import com.studyolle.domain.Account;
 import com.studyolle.domain.AccountZone;
 import com.studyolle.domain.Tag;
 import com.studyolle.domain.Zone;
-import com.studyolle.repository.TagRepository;
+import com.studyolle.tag.TagRepository;
 import com.studyolle.settings.form.TagForm;
 import com.studyolle.settings.form.ZoneForm;
 import com.studyolle.zone.ZoneRepository;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.annotation.Commit;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 

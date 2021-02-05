@@ -68,7 +68,7 @@ public class Study {
     private LocalDateTime publishedDateTime;
 
     //TODO 스터디 종료 일자
-    private LocalDateTime closeDateTime;
+    private LocalDateTime closedDateTime;
 
     //TODO 스터디 여닫는 시간 제한
     private LocalDateTime recruitingUpdateDatetime;
@@ -165,5 +165,48 @@ public class Study {
 
     public boolean isRemovable() {
         return isPublished() && isRecruiting();
+    }
+
+    public boolean canRecruiting() {
+        return this.published && this.recruitingUpdateDatetime == null ||
+                recruitingUpdateDatetime.isBefore(LocalDateTime.now().minusHours(1));
+    }
+
+    public void publish() {
+        if(!this.closed && !this.published) {
+            this.published = true;
+            this.publishedDateTime = LocalDateTime.now();
+            return;
+        }
+
+        throw new RuntimeException("스터디를 공개 할 수 없는 상태입니다. 스터디를 이미 공개했거나 종료했습니다.");
+    }
+
+    public void close() {
+        if(!this.closed && this.published) {
+            this.closed = true;
+            this.closedDateTime = LocalDateTime.now();
+            return;
+        }
+
+        throw new RuntimeException("스터디를 종료 할 수 없는 상태입니다. 스터디를 공개하지 않았거나 이미 종료한 스터디입니다.");
+    }
+
+    public void startRecruit() {
+        if(canRecruiting()) {
+            this.recruiting = true;
+            this.recruitingUpdateDatetime = LocalDateTime.now();
+            return;
+        }
+
+        throw new RuntimeException("인원 모집을 시작할 수 없습니다. 스터디를 공개하거나 한 시간 뒤에 다시 시도하세요.");
+    }
+
+    public void stopRecruit() {
+        if(canRecruiting() && recruiting) {
+            this.recruiting = false;
+            this.recruitingUpdateDatetime = LocalDateTime.now();
+            return;
+        }
     }
 }
