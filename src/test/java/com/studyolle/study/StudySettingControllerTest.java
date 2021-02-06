@@ -401,6 +401,49 @@ class StudySettingControllerTest {
         assertThat(findStudy.getClosedDateTime()).isNotNull();
     }
 
+    @Test @DisplayName("스터디 인원 모집 - 성공")
+    @WithAccount("youngbin")
+    @Transactional
+    void startRecruitStudySuccessTest() throws Exception {
+        Study study = createByStudy();
+
+        study.setPublished(true);
+
+        mockMvc.perform(post("/study/study/settings/recruit/start")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/study/settings/study"))
+                .andExpect(flash().attributeExists("message"));
+
+        Study findStudy = studyRepository.findByPath("study");
+
+        assertThat(findStudy).isNotNull();
+        assertThat(findStudy.isRecruiting()).isTrue();
+        assertThat(findStudy.getRecruitingUpdateDatetime()).isNotNull();
+    }
+
+    @Test @DisplayName("스터디 인원 모집 - 성공")
+    @WithAccount("youngbin")
+    @Transactional
+    void stopRecruitStudySuccessTest() throws Exception {
+        Study study = createByStudy();
+
+        study.setPublished(true);
+        study.setRecruiting(true);
+
+        mockMvc.perform(post("/study/study/settings/recruit/start")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/study/settings/study"))
+                .andExpect(flash().attributeExists("message"));
+
+        Study findStudy = studyRepository.findByPath("study");
+
+        assertThat(findStudy).isNotNull();
+        assertThat(findStudy.isRecruiting()).isTrue();
+        assertThat(findStudy.getRecruitingUpdateDatetime()).isNotNull();
+    }
+
     Study createByStudy() {
         Account account = accountRepository.findByNickname("youngbin");
 
