@@ -7,6 +7,7 @@ import com.studyolle.domain.Account;
 import com.studyolle.domain.Study;
 import com.studyolle.domain.Tag;
 import com.studyolle.domain.Zone;
+import com.studyolle.study.form.StudyPathForm;
 import com.studyolle.tag.TagRepository;
 import com.studyolle.study.form.StudyDescriptionForm;
 import com.studyolle.study.form.TagForm;
@@ -249,6 +250,25 @@ public class StudySettingController {
 
         studyService.stopRecruit(study);
         attributes.addFlashAttribute("message", "스터디 인원 모집을 종료했습니다.");
+        return getSettingsStudyReturn(study.getEncodingPath());
+    }
+
+    @PostMapping("/study/path")
+    public String updateStudyPath(@CurrentUser Account account, @PathVariable String path,
+                                  @Valid @ModelAttribute StudyPathForm studyPathForm, Errors errors,
+                                  Model model, RedirectAttributes attributes) throws UnsupportedEncodingException {
+        Study study = studyService.getStudyToUpdate(account, path);
+
+        if(errors.hasErrors()) {
+            model.addAttribute("account", account);
+            model.addAttribute("study", study);
+            model.addAttribute("message", "사용할 수 없는 경로 입니다.");
+            return "study/settings/study";
+        }
+
+        studyService.updateStudyPath(study, studyPathForm.getNewPath());
+        attributes.addFlashAttribute("message", "스터디 경로가 수정되었습니다.");
+
         return getSettingsStudyReturn(study.getEncodingPath());
     }
 
