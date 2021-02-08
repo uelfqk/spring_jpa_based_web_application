@@ -7,11 +7,8 @@ import com.studyolle.domain.Account;
 import com.studyolle.domain.Study;
 import com.studyolle.domain.Tag;
 import com.studyolle.domain.Zone;
+import com.studyolle.study.form.*;
 import com.studyolle.tag.TagRepository;
-import com.studyolle.study.form.StudyDescriptionForm;
-import com.studyolle.study.form.StudyForm;
-import com.studyolle.study.form.TagForm;
-import com.studyolle.study.form.ZoneForm;
 import com.studyolle.zone.ZoneRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -444,6 +441,45 @@ class StudySettingControllerTest {
         assertThat(findStudy.getRecruitingUpdateDatetime()).isNotNull();
     }
 
+    @Test @DisplayName("스터디 경로 수정 - 성공")
+    @WithAccount("youngbin")
+    void updateStudyPathSuccessTest() throws Exception {
+        createByStudy();
+
+        mockMvc.perform(post("/study/study/settings/study/path")
+                .param("newPath", "new-study")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/new-study/settings/study"))
+                .andExpect(flash().attributeExists("message"));
+
+        Study study = studyRepository.findByPath("new-study");
+
+        assertThat(study).isNotNull();
+        assertThat(study.getPath()).isEqualTo("new-study");
+    }
+
+    @Test @DisplayName("스터디 경로 수정 - 실패")
+    @WithAccount("youngbin")
+    void updateStudyPathFailTest() throws Exception {
+        createByStudy();
+
+        mockMvc.perform(post("/study/study/settings/study/path")
+                .param("newPath","sadhasdnkjqwndlkwqndlk;askhas;lkfhlkqw;roiqffabfa" +
+                        "bfakjbjabskjclsabjkasbjaklgjkdbwqjkdbwqkjdbqwkjdbaksjdbsakdbkjsadsa")
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("study/settings/study"))
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("study"))
+                .andExpect(model().attributeExists("message"));
+
+        Study study = studyRepository.findByPath("study");
+
+        assertThat(study).isNotNull();
+        assertThat(study.getPath()).isEqualTo("study");
+    }
+    
     Study createByStudy() {
         Account account = accountRepository.findByNickname("youngbin");
 
