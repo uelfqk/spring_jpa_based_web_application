@@ -479,6 +479,57 @@ class StudySettingControllerTest {
         assertThat(study).isNotNull();
         assertThat(study.getPath()).isEqualTo("study");
     }
+
+    @Test @DisplayName("스터디 제목 수정 - 성공")
+    @WithAccount("youngbin")
+    void updateStudyTitleSuccessTest() throws Exception {
+        createByStudy();
+
+        MvcResult result = mockMvc.perform(post("/study/study/settings/study/title")
+                .param("newTitle", "스터디 제목 수정")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(model().hasNoErrors())
+                .andExpect(redirectedUrl("/study/study/settings/study"))
+                .andExpect(flash().attributeExists("message"))
+                .andReturn();
+
+        Study study = studyRepository.findByPath("study");
+
+        assertThat(study).isNotNull();
+        assertThat(study.getTitle()).isEqualTo("스터디 제목 수정");
+    }
+
+    @Test @DisplayName("스터디 제목 수정 - 실패")
+    @WithAccount("youngbin")
+    void updateStudyTitleFailTest() throws Exception {
+        createByStudy();
+
+        MvcResult result = mockMvc.perform(post("/study/study/settings/study/title")
+                .param("newTitle", "qwnkrlnwqkldrnqklnfdlkwqnflkwqnflkqnflkanflksanflkafnaknflkanflkafnaklfnkalfafsafaqwqwrqwr")
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("study/settings/study"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("study"))
+                .andExpect(model().attributeExists("message"))
+                .andReturn();
+
+        String message = result.getRequest().getAttribute("message").toString();
+        Study requestStudy = (Study)result.getRequest().getAttribute("study");
+        Account requestAccount = (Account)result.getRequest().getAttribute("account");
+
+        Study study = studyRepository.findByPath("study");
+
+        Account account = accountRepository.findByNickname("youngbin");
+
+        assertThat(study).isNotNull();
+        assertThat(study.getTitle()).isEqualTo("title");
+        assertThat(message).isEqualTo("사용할 수 없는 제목입니다.");
+        assertThat(requestStudy.getId()).isEqualTo(study.getId());
+        assertThat(requestAccount.getId()).isEqualTo(account.getId());
+    }
     
     Study createByStudy() {
         Account account = accountRepository.findByNickname("youngbin");

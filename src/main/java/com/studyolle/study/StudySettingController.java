@@ -279,11 +279,12 @@ public class StudySettingController {
         if(errors.hasErrors()) {
             model.addAttribute("account", account);
             model.addAttribute("study", study);
+            model.addAttribute("message", "사용할 수 없는 제목입니다.");
             return "study/settings/study";
         }
 
         studyService.updateStudyTitle(study, studyTitleForm.getNewTitle());
-
+        attributes.addFlashAttribute("message", "스터디 제목이 수정되었습니다.");
         return getSettingsStudyReturn(study.getEncodingPath());
     }
 
