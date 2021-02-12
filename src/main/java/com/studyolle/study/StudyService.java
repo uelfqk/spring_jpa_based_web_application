@@ -129,4 +129,13 @@ public class StudyService {
     public void updateStudyTitle(Study study, String newTitle) {
         study.setTitle(newTitle);
     }
+
+    public void removeStudy(Study study) {
+        if(study.isRemovable()) {
+            studyRepository.delete(study);
+            return;
+        }
+
+        throw new IllegalArgumentException("스터디를 삭제 할 수 없습니다.");
+    }
 }

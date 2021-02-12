@@ -240,7 +240,7 @@
                     <button class="btn btn-primary btn-sm" style="pointer-events: none;" type="button" disabled>CLOSED</button>
                 </span>
             <span th:if="${!study.recruiting}"
-                  class="d-inline-block ml-1" tabindex="0" data-toggle="tooltip" data-placement="bottom" title="팀원 모집중 아님">
+                  class="d-inevent-formline-block ml-1" tabindex="0" data-toggle="tooltip" data-placement="bottom" title="팀원 모집중 아님">
                     <button class="btn btn-primary btn-sm" style="pointer-events: none;" type="button" disabled>OFF</button>
                 </span>
             <span sec:authorize="isAuthenticated()" th:if="${study.isJoinable(#authentication.principal)}"

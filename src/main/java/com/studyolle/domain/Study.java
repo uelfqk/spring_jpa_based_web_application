@@ -164,7 +164,7 @@ public class Study {
     }
 
     public boolean isRemovable() {
-        return isPublished() && isRecruiting();
+        return isPublished() == false && isRecruiting() == false;
     }
 
     public boolean canRecruiting() {
