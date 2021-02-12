@@ -530,6 +530,21 @@ class StudySettingControllerTest {
         assertThat(requestStudy.getId()).isEqualTo(study.getId());
         assertThat(requestAccount.getId()).isEqualTo(account.getId());
     }
+
+    @Test @DisplayName("스터디 삭제 - 성공")
+    @WithAccount("youngbin")
+    void removeStudySuccessTest() throws Exception {
+        createByStudy();
+
+        mockMvc.perform(post("/study/study/settings/study/remove")
+                    .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
+
+        Study study = studyRepository.findByPath("study");
+
+        assertThat(study).isNull();
+    }
     
     Study createByStudy() {
         Account account = accountRepository.findByNickname("youngbin");
