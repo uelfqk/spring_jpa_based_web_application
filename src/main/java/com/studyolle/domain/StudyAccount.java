@@ -24,13 +24,30 @@ public class StudyAccount {
     @JoinColumn(name = "account_id")
     private Account account;
 
+    private boolean manager;
+
     public boolean isManager(Account account) {
-        return this.account.equals(account);
+//        return manager;
+        return this.account.equals(account) && manager;
     }
 
     public static StudyAccount createStudyAccount(Account account) {
         StudyAccount studyAccount = new StudyAccount();
         studyAccount.setAccount(account);
+        return studyAccount;
+    }
+
+    public static StudyAccount createStudyManager(Account account) {
+        StudyAccount studyAccount = new StudyAccount();
+        studyAccount.setAccount(account);
+        studyAccount.setManager(true);
+        return studyAccount;
+    }
+
+    public static StudyAccount createStudyMember(Account account) {
+        StudyAccount studyAccount = new StudyAccount();
+        studyAccount.setAccount(account);
+        studyAccount.setManager(false);
         return studyAccount;
     }
 }

@@ -29,7 +29,7 @@ public class StudyService {
     public Study createNewStudy(Account account, StudyForm studyForm) {
         Study study = modelMapper.map(studyForm, Study.class);
 
-        StudyAccount studyAccount = StudyAccount.createStudyAccount(account);
+        StudyAccount studyAccount = StudyAccount.createStudyManager(account);
         study.addStudyAccount(studyAccount);
 
         return studyRepository.save(study);
@@ -137,5 +137,10 @@ public class StudyService {
         }
 
         throw new IllegalArgumentException("스터디를 삭제 할 수 없습니다.");
+    }
+
+    public void joinStudy(Study study, Account account) {
+        StudyAccount studyAccount = StudyAccount.createStudyMember(account);
+        study.addStudyAccount(studyAccount);
     }
 }

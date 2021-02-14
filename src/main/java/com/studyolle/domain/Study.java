@@ -141,6 +141,10 @@ public class Study {
         return false;
     }
 
+    public Long getStudyMemberCount() {
+        return studyAccounts.stream().filter(account -> !account.isManager()).count();
+    }
+
     public String getEncodingPath() throws UnsupportedEncodingException {
         return URLEncoder.encode(this.path, String.valueOf(StandardCharsets.UTF_8));
     }

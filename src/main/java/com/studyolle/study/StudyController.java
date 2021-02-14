@@ -72,4 +72,11 @@ public class StudyController {
 
         return "study/members";
     }
+
+    @GetMapping("/study/{path}/join")
+    public String joinStudy(@CurrentUser Account account, @PathVariable String path) throws UnsupportedEncodingException {
+        Study study = studyRepository.findStudyAccountsByPath(path);
+        studyService.joinStudy(study, account);
+        return "redirect:/study/" + study.getEncodingPath();
+    }
 }

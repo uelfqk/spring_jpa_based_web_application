@@ -249,7 +249,9 @@
                         스터디 가입
                     </a>
                     <a class="btn btn-outline-primary" th:href="@{'/study/' + ${study.path} + '/members'}"
-                       th:text="${study.studyAccounts.size()}">1</a>
+                       th:text="${study.getStudyMemberCount()}">1</a>
+<!--                    <a class="btn btn-outline-primary" th:href="@{'/study/' + ${study.path} + '/members'}"-->
+<!--                       th:text="${study.studyAccounts.size()}">1</a>-->
                 </span>
             <span sec:authorize="isAuthenticated()"
                   th:if="${!study.closed && study.isMember(#authentication.principal)}" class="btn-group" role="group">
