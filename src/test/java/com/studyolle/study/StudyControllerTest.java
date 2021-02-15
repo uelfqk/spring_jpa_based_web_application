@@ -1,7 +1,10 @@
 package com.studyolle.study;
 
 import com.studyolle.WithAccount;
+import com.studyolle.WithAccountSecurityContextFactory;
 import com.studyolle.account.AccountRepository;
+import com.studyolle.account.AccountService;
+import com.studyolle.account.form.SignUpForm;
 import com.studyolle.domain.Account;
 import com.studyolle.domain.Study;
 import com.studyolle.study.form.StudyForm;
@@ -12,8 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -34,6 +39,9 @@ class StudyControllerTest {
 
     @Autowired
     AccountRepository accountRepository;
+
+    @Autowired
+    AccountService accountService;
 
     @Autowired
     MockMvc mockMvc;
@@ -138,5 +146,39 @@ class StudyControllerTest {
                 .andExpect(view().name("study/members"))
                 .andExpect(model().attributeExists("account"))
                 .andExpect(model().attributeExists("study"));
+    }
+
+    @Test @DisplayName("스터디 가입 테스트")
+    @WithAccount("youngbin")
+    void joinStudyTest() throws Exception {
+        SignUpForm signUpForm = new SignUpForm();
+        signUpForm.setNickname("newStudyManager");
+        signUpForm.setEmail("sss@gmail.com");
+        signUpForm.setPassword("123456789");
+
+        Account account = accountService.processNewAccount(signUpForm);
+
+        createByStudy(account);
+
+        mockMvc.perform(get("/study/study/join"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/study"));
+
+        Study study = studyRepository.findStudyAccountsByPathAndManager("study", false);
+
+        assertThat(study).isNotNull();
+        assertThat(study.getStudyAccounts().size()).isEqualTo(1);
+        assertThat(study.getStudyAccounts().get(0).getAccount().getNickname()).isEqualTo("youngbin");
+        assertThat(study.getStudyAccounts().get(0).isManager()).isFalse();
+    }
+
+    Study createByStudy(Account account) {
+        StudyForm studyForm = new StudyForm();
+        studyForm.setPath("study");
+        studyForm.setTitle("title");
+        studyForm.setShortDescription("short");
+        studyForm.setFullDescription("full");
+
+        return studyService.createNewStudy(account, studyForm);
     }
 }

@@ -52,6 +52,12 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
     Study findStudyAccountsByPath(@Param("path") String path);
 
     @Query("select s from Study s " +
+            "join fetch s.studyAccounts sa " +
+            "join fetch sa.account " +
+            "where s.path = :path and sa.manager = :manager")
+    Study findStudyAccountsByPathAndManager(@Param("path") String path, @Param("manager") boolean manager);
+
+    @Query("select s from Study s " +
             "left outer join fetch s.studyTags st " +
             "left outer join fetch st.tag " +
             "where s.path = :path")
