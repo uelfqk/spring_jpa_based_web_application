@@ -27,11 +27,10 @@ public class StudyAccount {
     private boolean manager;
 
     public boolean isManager(Account account) {
-//        return manager;
         return this.account.equals(account) && manager;
     }
 
-    public static StudyAccount createStudyAccount(Account account) {
+    public static StudyAccount createLeaveStudyAccount(Account account) {
         StudyAccount studyAccount = new StudyAccount();
         studyAccount.setAccount(account);
         return studyAccount;

@@ -243,7 +243,7 @@
                   class="d-inevent-formline-block ml-1" tabindex="0" data-toggle="tooltip" data-placement="bottom" title="팀원 모집중 아님">
                     <button class="btn btn-primary btn-sm" style="pointer-events: none;" type="button" disabled>OFF</button>
                 </span>
-            <span sec:authorize="isAuthenticated()" th:if="${study.isJoinable(#authentication.principal)}"
+            <span sec:authorize="isAuthenticated()" th:if="${!study.isJoinable(#authentication.principal)}"
                   class="btn-group" role="group" aria-label="Basic example">
                     <a class="btn btn-primary" th:href="@{'/study/' + ${study.path} + '/join'}">
                         스터디 가입
@@ -254,12 +254,13 @@
 <!--                       th:text="${study.studyAccounts.size()}">1</a>-->
                 </span>
             <span sec:authorize="isAuthenticated()"
-                  th:if="${!study.closed && study.isMember(#authentication.principal)}" class="btn-group" role="group">
+                    th:if="${!study.closed && !study.isManager(#authentication.principal) && study.isJoinable(#authentication.principal)}" class="btn-group" role="group">
+<!--                  th:if="${!study.closed && study.isMember(#authentication.principal)}" class="btn-group" role="group">-->
                     <a class="btn btn-outline-warning" th:href="@{'/study/' + ${study.path} + '/leave'}">
                         스터디 탈퇴
                     </a>
                     <a class="btn btn-outline-primary" th:href="@{'/study/' + ${study.path} + '/members'}"
-                       th:text="${study.members.size()}">1</a>
+                       th:text="${study.getStudyMemberCount()}">1</a>
                 </span>
             <span sec:authorize="isAuthenticated()"
                   th:if="${study.published && !study.closed && study.isManager(#authentication.principal)}">

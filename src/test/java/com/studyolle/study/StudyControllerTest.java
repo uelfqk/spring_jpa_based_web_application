@@ -7,6 +7,7 @@ import com.studyolle.account.AccountService;
 import com.studyolle.account.form.SignUpForm;
 import com.studyolle.domain.Account;
 import com.studyolle.domain.Study;
+import com.studyolle.domain.StudyAccount;
 import com.studyolle.study.form.StudyForm;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -17,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
@@ -151,13 +153,7 @@ class StudyControllerTest {
     @Test @DisplayName("스터디 가입 테스트")
     @WithAccount("youngbin")
     void joinStudyTest() throws Exception {
-        SignUpForm signUpForm = new SignUpForm();
-        signUpForm.setNickname("newStudyManager");
-        signUpForm.setEmail("sss@gmail.com");
-        signUpForm.setPassword("123456789");
-
-        Account account = accountService.processNewAccount(signUpForm);
-
+        Account account = createByStudyManager();
         createByStudy(account);
 
         mockMvc.perform(get("/study/study/join"))
@@ -170,6 +166,50 @@ class StudyControllerTest {
         assertThat(study.getStudyAccounts().size()).isEqualTo(1);
         assertThat(study.getStudyAccounts().get(0).getAccount().getNickname()).isEqualTo("youngbin");
         assertThat(study.getStudyAccounts().get(0).isManager()).isFalse();
+    }
+
+    @Test @DisplayName("스터디 탈퇴 테스트")
+    @WithAccount("youngbin")
+    void leaveStudyTest() throws Exception {
+        Account account = createByStudyManager();
+        Study study = createByStudy(account);
+
+        Account newMember = accountRepository.findByNickname("youngbin");
+
+        System.out.println("join Study ========================================================");
+
+        studyService.joinStudy(study, newMember);
+
+        System.out.println("size() = " + study.getStudyAccounts().size());
+        
+        for (StudyAccount studyAccount : study.getStudyAccounts()) {
+            System.out.println("getNickname() = " + studyAccount.getAccount().getNickname());
+            System.out.println("isManager() = " + studyAccount.isManager());
+        }
+
+        System.out.println("leave Study ========================================================");
+
+        studyService.leaveStudy(study, newMember);
+
+        System.out.println("leave Study End =======");
+
+        Study findStudy = studyRepository.findStudyAccountsByPath("study");
+
+        System.out.println("size() = " + findStudy.getStudyAccounts().size());
+
+        for (StudyAccount studyAccount : findStudy.getStudyAccounts()) {
+            System.out.println("getNickname() = " + studyAccount.getAccount().getNickname());
+            System.out.println("isManager() = " + studyAccount.isManager());
+        }
+    }
+
+    Account createByStudyManager() {
+        SignUpForm signUpForm = new SignUpForm();
+        signUpForm.setNickname("newStudyManager");
+        signUpForm.setEmail("sss@gmail.com");
+        signUpForm.setPassword("123456789");
+
+        return accountService.processNewAccount(signUpForm);
     }
 
     Study createByStudy(Account account) {

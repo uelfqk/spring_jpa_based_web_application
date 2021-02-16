@@ -112,8 +112,13 @@ public class Study {
     //                  1). th:if="${study.isJoinable(#authentication.principal)}"
     public boolean isJoinable(UserAccount userAccount) {
         Account account = userAccount.getAccount();
-        return this.isPublished() && this.isRecruiting()
-                && !this.studyMembers.contains(account) && !this.studyManagers.contains(account);
+        boolean result = this.isPublished() && this.isRecruiting() &&
+                this.studyAccounts.stream()
+                        .filter(sa -> sa.getAccount().getId() == account.getId()).count() != 0;
+
+        return result;
+//        return this.isPublished() && this.isRecruiting()
+//                && !this.studyMembers.contains(account) && !this.studyManagers.contains(account);
     }
 
     //TODO 2021.01.27 52. 스터디 조회
@@ -212,5 +217,9 @@ public class Study {
             this.recruitingUpdateDatetime = LocalDateTime.now();
             return;
         }
+    }
+
+    public void leaveAccount(Account account) {
+        studyAccounts.removeIf(sa -> sa.getAccount().equals(account));
     }
 }

@@ -143,4 +143,8 @@ public class StudyService {
         StudyAccount studyAccount = StudyAccount.createStudyMember(account);
         study.addStudyAccount(studyAccount);
     }
+
+    public void leaveStudy(Study study, Account account) {
+        study.leaveAccount(account);
+    }
 }
