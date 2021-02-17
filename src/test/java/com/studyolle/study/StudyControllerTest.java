@@ -172,35 +172,20 @@ class StudyControllerTest {
     @WithAccount("youngbin")
     void leaveStudyTest() throws Exception {
         Account account = createByStudyManager();
-        Study study = createByStudy(account);
+        Study newStudy = createByStudy(account);
 
-        Account newMember = accountRepository.findByNickname("youngbin");
+        Account newAccount = accountRepository.findByNickname("youngbin");
 
-        System.out.println("join Study ========================================================");
+        studyService.joinStudy(newStudy, newAccount);
 
-        studyService.joinStudy(study, newMember);
-
-        System.out.println("size() = " + study.getStudyAccounts().size());
-        
-        for (StudyAccount studyAccount : study.getStudyAccounts()) {
-            System.out.println("getNickname() = " + studyAccount.getAccount().getNickname());
-            System.out.println("isManager() = " + studyAccount.isManager());
-        }
-
-        System.out.println("leave Study ========================================================");
-
-        studyService.leaveStudy(study, newMember);
-
-        System.out.println("leave Study End =======");
+        mockMvc.perform(get("/study/study/leave"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/study"));
 
         Study findStudy = studyRepository.findStudyAccountsByPath("study");
 
-        System.out.println("size() = " + findStudy.getStudyAccounts().size());
-
-        for (StudyAccount studyAccount : findStudy.getStudyAccounts()) {
-            System.out.println("getNickname() = " + studyAccount.getAccount().getNickname());
-            System.out.println("isManager() = " + studyAccount.isManager());
-        }
+        assertThat(findStudy).isNotNull();
+        assertThat(findStudy.getStudyAccounts().size()).isEqualTo(1);
     }
 
     Account createByStudyManager() {
