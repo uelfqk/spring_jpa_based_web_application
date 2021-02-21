@@ -22,7 +22,7 @@ public class EventController {
     //TODO 2021.02.20 62. 모임 만들기
     //                 1. 모임 만들기 폼에 필요한 데이터를 랜더링하여 클라이언트로 반환
     @GetMapping("/new-event")
-    public String newEventForm(@CurrentUser Account account, @PathVariable String path, Model model) {
+    public String createEventForm(@CurrentUser Account account, @PathVariable String path, Model model) {
         Study study = studyRepository.findByPath(path);
 
         model.addAttribute("account", account);
