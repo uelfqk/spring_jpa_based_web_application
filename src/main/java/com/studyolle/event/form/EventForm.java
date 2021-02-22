@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 public class EventForm {
 
     @NotBlank
-    @Length(min = 50)
+    @Length(max = 50)
     private String title;
 
     private String description;

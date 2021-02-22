@@ -1,9 +1,7 @@
 package com.studyolle.domain;
 
 import com.studyolle.enums.EventType;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -12,7 +10,8 @@ import java.util.List;
 //TODO 62. 모임 도메인
 
 @Entity
-@Getter @Setter
+@Getter @Setter(AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EqualsAndHashCode(of = "id")
 public class Event {
 
@@ -52,6 +51,7 @@ public class Event {
 
     //TODO 62. 모임 도메인
     //      1. 프리미티브 타입을 래핑함으로서 null 값을 허용
+    //      2. 모임 인원 제한 수
     private Integer limitOfEnrollments;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.PERSIST, orphanRemoval = true)
@@ -59,4 +59,21 @@ public class Event {
 
     @Enumerated(EnumType.STRING)
     private EventType eventType;
+
+    public static Event createByEvent(Account account, Study study, String title, String description,
+                                      LocalDateTime endEnrollmentDateTime, LocalDateTime startDateTime, LocalDateTime endDateTime,
+                                      Integer limitOfEnrollments, EventType eventType) {
+        Event event = new Event();
+        event.setCreateBy(account);
+        event.setStudy(study);
+        event.setTitle(title);
+        event.setDescription(description);
+        event.setCreatedDateTime(LocalDateTime.now());
+        event.setEndEnrollmentDateTime(endEnrollmentDateTime);
+        event.setStartDateTime(startDateTime);
+        event.setEndDateTime(endDateTime);
+        event.setLimitOfEnrollments(limitOfEnrollments);
+        event.setEventType(eventType);
+        return event;
+    }
 }
