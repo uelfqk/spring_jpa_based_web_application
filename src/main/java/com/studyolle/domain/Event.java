@@ -1,5 +1,6 @@
 package com.studyolle.domain;
 
+import com.studyolle.account.UserAccount;
 import com.studyolle.enums.EventType;
 import lombok.*;
 
@@ -29,7 +30,7 @@ public class Event {
     //      1. 모임을 만든 유저의 정보
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
-    private Account createBy;
+    private Account createdBy;
 
     @Column(nullable = false)
     private String title;
@@ -64,7 +65,7 @@ public class Event {
                                       LocalDateTime endEnrollmentDateTime, LocalDateTime startDateTime, LocalDateTime endDateTime,
                                       Integer limitOfEnrollments, EventType eventType) {
         Event event = new Event();
-        event.setCreateBy(account);
+        event.setCreatedBy(account);
         event.setStudy(study);
         event.setTitle(title);
         event.setDescription(description);
@@ -75,5 +76,30 @@ public class Event {
         event.setLimitOfEnrollments(limitOfEnrollments);
         event.setEventType(eventType);
         return event;
+    }
+
+    public int numberOfRemainSpots() {
+        return limitOfEnrollments - enrollments.size();
+    }
+
+    public boolean isEnrollableFor(UserAccount userAccount) {
+        Account account = userAccount.getAccount();
+        return getEnrollmentAccountCount(account.getId()) == 0;
+    }
+
+    public boolean isDisenrollableFor(UserAccount userAccount) {
+        Account account = userAccount.getAccount();
+        return getEnrollmentAccountCount(account.getId()) > 0;
+    }
+
+    public boolean isAttended(UserAccount userAccount) {
+        Account account = userAccount.getAccount();
+        return enrollments.stream().filter(e -> e.getAccount().getId() == account.getId() && e.isAttended())
+                .count() > 0;
+    }
+
+    private Long getEnrollmentAccountCount(Long accountId) {
+        return enrollments.stream().filter(e -> e.getAccount().getId() == accountId)
+                .count();
     }
 }

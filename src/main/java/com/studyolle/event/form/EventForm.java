@@ -3,6 +3,7 @@ package com.studyolle.event.form;
 import com.studyolle.enums.EventType;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 //                    기본값을 2로 설정
 
 @Getter @Setter
+@ToString
 public class EventForm {
 
     @NotBlank
