@@ -53,6 +53,7 @@ public class EventFormValidator implements Validator {
     //                 1. 모임 마감 일시 검증
     //                  1). 폼에서 입력받은 모임 등록 마감 일시가 현재 시간 이후 인지 검증
     private boolean isNotValidEndEnrollmentDateTime(EventForm eventForm) {
+        LocalDateTime now = LocalDateTime.now();
         return eventForm.getEndEnrollmentDateTime().isBefore(LocalDateTime.now());
     }
 }

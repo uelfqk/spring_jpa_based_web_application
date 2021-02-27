@@ -78,6 +78,7 @@ public class EventController {
         Study study = studyService.getStudyToUpdate(account, path);
 //        Event event = eventRepository.findById(eventId)
 //                .orElseThrow(() -> new IllegalArgumentException("정보 이상"));
+        //Study study = studyRepository.findStudyAccountsByPath(path);
         Event event = eventRepository.findWithCreateByWithEnrollmentsById(eventId);
 
         model.addAttribute("account", account);
@@ -96,8 +97,29 @@ public class EventController {
 
         model.addAttribute("account", account);
         model.addAttribute("study", study);
+        model.addAttribute("event", event);
         model.addAttribute("eventForm", modelMapper.map(event, EventForm.class));
 
         return "event/update-form";
+    }
+
+    @PostMapping("/events/{event-id}/edit")
+    public String editEvents(@CurrentUser Account account, @PathVariable String path,
+                             @PathVariable(value = "event-id") Long eventId,
+                             @Valid @ModelAttribute EventForm eventForm, Errors errors, Model model)
+            throws UnsupportedEncodingException {
+        Study study = studyService.getStudyToUpdate(account, path);
+        Event event = eventRepository.findById(eventId).orElseGet(() -> Event.defaultEvent());
+
+        if(errors.hasErrors()) {
+            model.addAttribute("account", account);
+            model.addAttribute("study", study);
+            model.addAttribute("event", event);
+            return "event/view";
+        }
+
+        eventService.editEvent(event, eventForm);
+
+        return "redirect:/study/" + study.getEncodingPath() + "/events/" + event.getId();
     }
 }

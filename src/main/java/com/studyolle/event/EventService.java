@@ -22,4 +22,14 @@ public class EventService {
 
         return eventRepository.save(event);
     }
+
+    public void editEvent(Event event, EventForm form) {
+        event.editEvent(form.getTitle(),
+                form.getDescription(),
+                form.getEventType(),
+                form.getLimitOfEnrollments(),
+                form.getEndEnrollmentDateTime(),
+                form.getStartDateTime(),
+                form.getEndDateTime());
+    }
 }

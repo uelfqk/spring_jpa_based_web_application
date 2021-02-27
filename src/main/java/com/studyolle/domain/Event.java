@@ -61,6 +61,10 @@ public class Event {
     @Enumerated(EnumType.STRING)
     private EventType eventType;
 
+    public boolean isNewEvent() {
+        return this.id == null;
+    }
+
     public static Event createByEvent(Account account, Study study, String title, String description,
                                       LocalDateTime endEnrollmentDateTime, LocalDateTime startDateTime, LocalDateTime endDateTime,
                                       Integer limitOfEnrollments, EventType eventType) {
@@ -76,6 +80,21 @@ public class Event {
         event.setLimitOfEnrollments(limitOfEnrollments);
         event.setEventType(eventType);
         return event;
+    }
+
+    public static Event defaultEvent() {
+        return new Event();
+    }
+
+    public void editEvent(String title, String description, EventType eventType ,Integer limitOfEnrollments,
+                          LocalDateTime endEnrollmentDateTime, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        this.title = title;
+        this.description = description;
+        this.eventType = eventType;
+        this.limitOfEnrollments = limitOfEnrollments;
+        this.endEnrollmentDateTime = endEnrollmentDateTime;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
     }
 
     public int numberOfRemainSpots() {
