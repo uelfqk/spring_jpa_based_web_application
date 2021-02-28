@@ -61,10 +61,6 @@ public class Event {
     @Enumerated(EnumType.STRING)
     private EventType eventType;
 
-    public boolean isNewEvent() {
-        return this.id == null;
-    }
-
     public static Event createByEvent(Account account, Study study, String title, String description,
                                       LocalDateTime endEnrollmentDateTime, LocalDateTime startDateTime, LocalDateTime endDateTime,
                                       Integer limitOfEnrollments, EventType eventType) {
@@ -120,5 +116,9 @@ public class Event {
     private Long getEnrollmentAccountCount(Long accountId) {
         return enrollments.stream().filter(e -> e.getAccount().getId() == accountId)
                 .count();
+    }
+
+    public void addEnrollment(Enrollment enrollment) {
+        this.enrollments.add(enrollment);
     }
 }

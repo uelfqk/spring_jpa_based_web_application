@@ -38,4 +38,12 @@ public class Enrollment {
     //TODO 62. 모임 도메인  
     //      1. 실제로 모임에 참가를 했는지 안했는지 판단
     private boolean attended;
+
+    public static Enrollment createBy(Event event, Account account) {
+        Enrollment enrollment = new Enrollment();
+        enrollment.setEvent(event);
+        enrollment.setAccount(account);
+        enrollment.setEnrolledAt(LocalDateTime.now());
+        return enrollment;
+    }
 }

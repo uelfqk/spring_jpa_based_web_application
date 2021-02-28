@@ -1,6 +1,7 @@
 package com.studyolle.event;
 
 import com.studyolle.domain.Account;
+import com.studyolle.domain.Enrollment;
 import com.studyolle.domain.Event;
 import com.studyolle.domain.Study;
 import com.studyolle.event.form.EventForm;
@@ -20,6 +21,8 @@ public class EventService {
                 eventForm.getEndEnrollmentDateTime(), eventForm.getStartDateTime(), eventForm.getEndDateTime(),
                 eventForm.getLimitOfEnrollments(), eventForm.getEventType());
 
+        Enrollment enrollment = Enrollment.createBy(event, account);
+
         return eventRepository.save(event);
     }
 
@@ -31,5 +34,13 @@ public class EventService {
                 form.getEndEnrollmentDateTime(),
                 form.getStartDateTime(),
                 form.getEndDateTime());
+    }
+
+    public Event enrollEvent(Long eventId, Account account) {
+        Event event = eventRepository.findWithEnrollmentsById(eventId);
+        Enrollment enrollment = Enrollment.createBy(event, account);
+        event.addEnrollment(enrollment);
+
+        return event;
     }
 }

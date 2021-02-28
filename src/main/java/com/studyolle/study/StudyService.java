@@ -34,6 +34,18 @@ public class StudyService {
 
         return studyRepository.save(study);
     }
+    
+    public Study getStudyWithManager(Account account, String path) {
+        Study study = studyRepository.findStudyAccountsByPath(path);
+        boolean result = study.getStudyAccounts().stream().filter(s -> s.isManager(account))
+                .count() > 0;
+
+        if(!result) {
+            throw new IllegalArgumentException(path + "에 해당하는 스터디가 없습니다.");
+        }
+
+        return study;
+    }
 
     public Study getStudyToUpdate(Account account, String path) {
         Study study = this.getStudy(path);
