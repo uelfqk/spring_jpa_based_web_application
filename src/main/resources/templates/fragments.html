@@ -425,7 +425,7 @@
                     contentType: "application/json; charset=utf-8",
                     method: "POST",
                     url: "[(${baseUrl})]" + url,
-                    data: JSON.stringify({'tagTitle': tagTitle})
+                    data: JSON.stringify({'': tagTitle})
                 }).done(function (data, status) {
                     console.log("${data} and status is ${status}");
                 });

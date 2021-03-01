@@ -113,12 +113,24 @@ public class Event {
                 .count() > 0;
     }
 
+    public void addEnrollment(Enrollment enrollment) {
+        this.enrollments.add(enrollment);
+    }
+
+    public boolean isLimitOverEnroll() {
+        return enrollments.size() >= limitOfEnrollments;
+    }
+
+    public boolean canAccept(Enrollment enrollment) {
+        return true;
+    }
+
+    public boolean canReject(Enrollment enrollment) {
+        return false;
+    }
+
     private Long getEnrollmentAccountCount(Long accountId) {
         return enrollments.stream().filter(e -> e.getAccount().getId() == accountId)
                 .count();
-    }
-
-    public void addEnrollment(Enrollment enrollment) {
-        this.enrollments.add(enrollment);
     }
 }

@@ -8,7 +8,10 @@ import com.studyolle.event.form.EventForm;
 import com.studyolle.event.validator.EventFormValidator;
 import com.studyolle.study.StudyRepository;
 import com.studyolle.study.StudyService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -126,6 +129,20 @@ public class EventController {
 
         Event event = eventService.enrollEvent(eventId, account);
         return "redirect:/study/" + event.getStudy().getEncodingPath() + "/events/" + event.getId();
+    }
+
+    @PostMapping("/api/events/{event-id}")
+    @ResponseBody
+    public Long addApiEvent(@RequestBody RequestEvent event) {
+        System.out.println("event = " + event);
+        return 1L;
+    }
+
+    @Getter @Setter
+    @ToString
+    static class RequestEvent {
+        private String title;
+        private String description;
     }
 
 }
