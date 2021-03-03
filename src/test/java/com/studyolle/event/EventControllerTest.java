@@ -6,6 +6,7 @@ import com.studyolle.domain.Account;
 import com.studyolle.domain.Event;
 import com.studyolle.domain.Study;
 import com.studyolle.enums.EventType;
+import com.studyolle.event.form.EventForm;
 import com.studyolle.study.StudyRepository;
 import com.studyolle.study.StudyService;
 import com.studyolle.study.form.StudyForm;
@@ -131,6 +132,52 @@ class EventControllerTest {
                 .andExpect(model().hasErrors());
     }
 
+    @Test @DisplayName("모임 뷰 보여주기")
+    @WithAccount("youngbin")
+    void showEventTest() throws Exception {
+        Account account = findAccount();
+        Study study = createByStudy(account);
+        Event event = createByEvent(account, study);
+        MvcResult result = mockMvc.perform(get("/study/study/events/" + event.getId()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("event/view"))
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("study"))
+                .andExpect(model().attributeExists("event"))
+                .andReturn();
+
+        Event requestEvent = (Event)result.getRequest().getAttribute("event");
+
+        assertThat(requestEvent).isEqualTo(event);
+    }
+
+    @Test @DisplayName("모임 수정 폼 보여주기")
+    @WithAccount("youngbin")
+    void editViewEventTest() throws Exception {
+        Account account = findAccount();
+        Study study = createByStudy(account);
+        Event event = createByEvent(account, study);
+
+        MvcResult result = mockMvc.perform(get("/study/study/events/" + event.getId() + "/edit"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("event/update-form"))
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("study"))
+                .andExpect(model().attributeExists("event"))
+                .andExpect(model().attributeExists("eventForm"))
+                .andReturn();
+
+        EventForm eventForm = (EventForm)result.getRequest().getAttribute("eventForm");
+
+        assertThat(event.getTitle()).isEqualTo(eventForm.getTitle());
+        assertThat(event.getDescription()).isEqualTo(eventForm.getDescription());
+        assertThat(event.getLimitOfEnrollments()).isEqualTo(eventForm.getLimitOfEnrollments());
+        assertThat(event.getEndEnrollmentDateTime()).isEqualTo(eventForm.getEndEnrollmentDateTime());
+        assertThat(event.getStartDateTime()).isEqualTo(eventForm.getStartDateTime());
+        assertThat(event.getEndDateTime()).isEqualTo(eventForm.getEndDateTime());
+        assertThat(event.getEventType()).isEqualTo(eventForm.getEventType());
+    }
+
     Long getEventIdToLong(String eventId) {
         return Long.parseLong(eventId);
     }
@@ -151,6 +198,14 @@ class EventControllerTest {
     }
 
     Event createByEvent(Account account, Study study) {
-        return Event.defaultEvent();
+        EventForm eventForm = new EventForm();
+        eventForm.setTitle("eventTitle");
+        eventForm.setDescription("eventDescription");
+        eventForm.setLimitOfEnrollments(2);
+        eventForm.setEventType(EventType.FCFS);
+        eventForm.setEndEnrollmentDateTime(LocalDateTime.now().plusDays(1));
+        eventForm.setStartDateTime(LocalDateTime.now().plusDays(2));
+        eventForm.setEndDateTime(LocalDateTime.now().plusDays(20));
+        return eventService.createNewEvent(account, study, eventForm);
     }
 }
