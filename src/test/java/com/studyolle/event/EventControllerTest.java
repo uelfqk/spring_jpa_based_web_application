@@ -7,6 +7,7 @@ import com.studyolle.domain.Event;
 import com.studyolle.domain.Study;
 import com.studyolle.enums.EventType;
 import com.studyolle.event.form.EventForm;
+import com.studyolle.event.validator.EventFormValidator;
 import com.studyolle.study.StudyRepository;
 import com.studyolle.study.StudyService;
 import com.studyolle.study.form.StudyForm;
@@ -19,7 +20,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.Errors;
 
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
@@ -176,6 +180,38 @@ class EventControllerTest {
         assertThat(event.getStartDateTime()).isEqualTo(eventForm.getStartDateTime());
         assertThat(event.getEndDateTime()).isEqualTo(eventForm.getEndDateTime());
         assertThat(event.getEventType()).isEqualTo(eventForm.getEventType());
+    }
+
+
+    @Test @DisplayName("모임 수정하기 - 성공")
+    @WithAccount("youngbin")
+    void editEventSuccessTest() throws Exception {
+        Account account = findAccount();
+        Study study = createByStudy(account);
+        Event event = createByEvent(account, study);
+
+        MvcResult result = mockMvc.perform(post("/study/study/events/" + event.getId() + "/edit")
+                .param("title", "newEventTitle")
+                .param("description", "newEventDescription")
+                .param("eventType", EventType.CONFIRMATIVE.toString())
+                .param("limitOfEnrollments", "4")
+                .param("endEnrollmentDateTime", LocalDateTime.now().plusHours(2L).toString())
+                .param("startDateTime", LocalDateTime.now().plusHours(4L).toString())
+                .param("endDateTime", LocalDateTime.now().plusHours(6L).toString())
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/study/events/" + event.getId()))
+                .andExpect(model().hasNoErrors())
+                .andReturn();
+
+        Event findEvent = eventRepository.findById(event.getId())
+                .orElseThrow(() -> new IllegalArgumentException(""));
+
+        assertThat(findEvent).isNotNull();
+        assertThat(findEvent.getTitle()).isEqualTo("newEventTitle");
+        assertThat(findEvent.getDescription()).isEqualTo("newEventDescription");
+        assertThat(findEvent.getEventType()).isEqualTo(EventType.CONFIRMATIVE);
+        assertThat(findEvent.getLimitOfEnrollments()).isEqualTo(4);
     }
 
     Long getEventIdToLong(String eventId) {
