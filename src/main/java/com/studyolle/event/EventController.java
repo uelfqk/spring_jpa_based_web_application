@@ -24,6 +24,7 @@ import javax.validation.Valid;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -131,18 +132,23 @@ public class EventController {
         return "redirect:/study/" + event.getStudy().getEncodingPath() + "/events/" + event.getId();
     }
 
-    @PostMapping("/api/events/{event-id}")
-    @ResponseBody
-    public Long addApiEvent(@RequestBody RequestEvent event) {
-        System.out.println("event = " + event);
-        return 1L;
-    }
+    @GetMapping("/events")
+    public String showEvents(@CurrentUser Account account, @PathVariable String path, Model model) {
+        Study study = studyRepository.findByPath(path);
 
-    @Getter @Setter
-    @ToString
-    static class RequestEvent {
-        private String title;
-        private String description;
+        List<Event> events = eventRepository.findAllByStudyId(study.getId());
+
+        List<Event> oldEvents = events.stream().filter(e -> e.getEndDateTime().isBefore(LocalDateTime.now()))
+                .collect(Collectors.toList());
+
+        List<Event> newEvents = events.stream().filter(e -> e.getEndDateTime().isAfter(LocalDateTime.now()))
+                .collect(Collectors.toList());
+
+        model.addAttribute("account", account);
+        model.addAttribute("study", study);
+        model.addAttribute("oldEvents", oldEvents);
+        model.addAttribute("newEvents", newEvents);
+        return "study/events";
     }
 
 }

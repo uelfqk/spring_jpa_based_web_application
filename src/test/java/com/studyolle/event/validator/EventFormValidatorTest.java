@@ -8,10 +8,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -97,7 +99,7 @@ class EventFormValidatorTest {
     }
 
     @Test
-    void isNotValidEndEnrollmentDateTimeFailWithIsBeforeLocalDateTimeNowDatetimeTest() throws Exception {
+    void privateIsNotValidEndEnrollmentDateTimeFailWithIsBeforeLocalDateTimeNowDatetimeTest() throws Exception {
         EventForm eventForm = createByEventForm(
                 createEndEnrollmentDateTimeByDay(4),
                 createStartDateTimeByDay(5),
@@ -108,6 +110,27 @@ class EventFormValidatorTest {
                 initializedPrivateMethod(PRIVATE_METHOD_IS_NOT_VALID_END_ENROLLMENT_DATE_TIME);
 
         assertThat(getResultWithPrivateMethod(method, eventForm)).isTrue();
+    }
+
+    @Test
+    void isNotValidEndEnrollmentDateTimeFailWithIsBeforeLocalDateTimeNowDatetimeTest() throws Exception {
+        EventForm eventForm = createByEventForm(
+                createEndEnrollmentDateTimeByDay(4),
+                createStartDateTimeByDay(5),
+                createEndDateTimeByDay(6)
+        );
+
+        Errors errors = createByErrors(eventForm);
+
+        eventFormValidator.validate(eventForm, errors);
+
+        FieldError error = errors.getFieldError();
+
+        assertThat(error.getObjectName()).isEqualTo("eventForm");
+        assertThat(error.getField()).isEqualTo("endEnrollmentDateTime");
+        assertThat(error.getCode()).isEqualTo("wrong.datetime");
+        assertThat(error.getDefaultMessage()).isEqualTo("등록 마감 일시를 정확히 입력해주세요.");
+        assertThat(errors.hasErrors()).isTrue();
     }
 
     private Method initializedPrivateMethod(String privateMethodName) throws NoSuchMethodException {
