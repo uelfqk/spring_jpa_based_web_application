@@ -7,6 +7,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 //TODO 62. 모임 도메인
 
@@ -94,7 +95,8 @@ public class Event {
     }
 
     public int numberOfRemainSpots() {
-        return limitOfEnrollments - enrollments.size();
+        return limitOfEnrollments - (int)enrollments.stream().
+                filter(er -> er.isAccepted()).count();
     }
 
     public boolean isEnrollableFor(UserAccount userAccount) {
@@ -109,7 +111,8 @@ public class Event {
 
     public boolean isAttended(UserAccount userAccount) {
         Account account = userAccount.getAccount();
-        return enrollments.stream().filter(e -> e.getAccount().getId() == account.getId() && e.isAttended())
+        return enrollments.stream()
+                .filter(e -> e.getAccount().equals(account) && e.isAttended())
                 .count() > 0;
     }
 
@@ -132,5 +135,33 @@ public class Event {
     private Long getEnrollmentAccountCount(Long accountId) {
         return enrollments.stream().filter(e -> e.getAccount().getId() == accountId)
                 .count();
+    }
+
+    public void disEnrollEvent(Account account) {
+        Enrollment enrollment = enrollments.stream()
+                .filter(r -> r.getAccount().equals(account))
+                .findAny()
+                .orElseThrow(() -> new NoSuchElementException("회원정보가 잘못되었습니다."));
+
+        enrollments.remove(enrollment);
+
+        if(isFCFSEnrollment()) {
+            nextAccountEnrollEvent();
+        }
+    }
+
+    private void nextAccountEnrollEvent() {
+        Enrollment enrollment = enrollments.stream().filter(e -> !e.isAccepted())
+                .findFirst().orElse(null);
+
+        if(enrollment == null) {
+            return;
+        }
+
+        enrollment.setAccepted(true);
+    }
+
+    public boolean isFCFSEnrollment() {
+        return eventType == EventType.FCFS && numberOfRemainSpots() != 0;
     }
 }

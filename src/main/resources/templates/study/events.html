@@ -36,7 +36,8 @@
                                     <span class="calendar" th:text="${event.startDateTime}"></span> 모임 시작
                                 </li>
                                 <li class="list-group-item">
-                                    <i class="fa fa-hourglass-end"></i> <span class="fromNow" th:text="${event.endEnrollmentDateTime}"></span> 모집 마감,
+                                    <i class="fa fa-hourglass-end"></i>
+                                    모집 마감 <span class="fromNow" th:text="${event.endEnrollmentDateTime}"></span>,
                                     <span th:if="${event.limitOfEnrollments != 0}">
                                     <span th:text="${event.limitOfEnrollments}"></span>명 모집 중
                                     (<span th:text="${event.numberOfRemainSpots()}"></span> 자리 남음)

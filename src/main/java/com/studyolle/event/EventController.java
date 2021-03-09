@@ -24,6 +24,7 @@ import javax.validation.Valid;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Controller
@@ -110,12 +111,14 @@ public class EventController {
                              @Valid @ModelAttribute EventForm eventForm, Errors errors, Model model)
             throws UnsupportedEncodingException {
         Study study = studyService.getStudyWithManager(account, path);
-        Event event = eventRepository.findById(eventId).orElseGet(() -> Event.defaultEvent());
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("모임 정보가 정화하지 않습니다."));
 
         if(errors.hasErrors()) {
             model.addAttribute("account", account);
             model.addAttribute("study", study);
             model.addAttribute("event", event);
+            System.out.println("!!!!");
             return "event/view";
         }
 
@@ -129,6 +132,15 @@ public class EventController {
                               @PathVariable(value = "event-id") Long eventId) throws UnsupportedEncodingException {
 
         Event event = eventService.enrollEvent(eventId, account);
+        return "redirect:/study/" + event.getStudy().getEncodingPath() + "/events/" + event.getId();
+    }
+
+    @PostMapping("/events/{event-id}/disenroll")
+    public String disEnrollEvent(@CurrentUser Account account, @PathVariable String path,
+                                 @PathVariable(value = "event-id") Long eventId) throws UnsupportedEncodingException {
+
+        Event event = eventService.disEnrollEvent(eventId, account);
+
         return "redirect:/study/" + event.getStudy().getEncodingPath() + "/events/" + event.getId();
     }
 

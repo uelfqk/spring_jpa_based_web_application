@@ -21,8 +21,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "join fetch e.study " +
             "left join fetch e.enrollments em " +
             "left join fetch em.account " +
-            "where e.id = :eventId")
-    Event findWithEnrollmentsById(@Param("eventId") Long eventId);
+            "where e.id = :eventId " +
+            "order by em.enrolledAt asc")
+    Event findWithStudyWithEnrollmentsById(@Param("eventId") Long eventId);
 
     @Query("select distinct e from Event e " +
             "left join fetch e.enrollments " +

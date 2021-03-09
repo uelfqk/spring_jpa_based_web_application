@@ -1,5 +1,6 @@
 package com.studyolle.domain;
 
+import com.studyolle.enums.EventType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,6 +45,11 @@ public class Enrollment {
         enrollment.setEvent(event);
         enrollment.setAccount(account);
         enrollment.setEnrolledAt(LocalDateTime.now());
+
+        if(event.isFCFSEnrollment()) {
+            enrollment.setAccepted(true);
+        }
+
         return enrollment;
     }
 }
