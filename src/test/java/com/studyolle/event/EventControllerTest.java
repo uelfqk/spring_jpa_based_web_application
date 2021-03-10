@@ -2,6 +2,8 @@ package com.studyolle.event;
 
 import com.studyolle.WithAccount;
 import com.studyolle.account.AccountRepository;
+import com.studyolle.account.AccountService;
+import com.studyolle.account.form.SignUpForm;
 import com.studyolle.domain.Account;
 import com.studyolle.domain.Event;
 import com.studyolle.domain.Study;
@@ -39,6 +41,9 @@ class EventControllerTest {
 
     @Autowired
     AccountRepository accountRepository;
+
+    @Autowired
+    AccountService accountService;
 
     @Autowired
     StudyService studyService;
@@ -214,6 +219,25 @@ class EventControllerTest {
         assertThat(findEvent.getLimitOfEnrollments()).isEqualTo(4);
     }
 
+    @Test @DisplayName("모임 참가하기")
+    @WithAccount("youngbin")
+    void enrollEventTest() throws Exception {
+        Account newAccount = createNewAccount("newAccount");
+        Study study = createByStudy(newAccount);
+        Event event = createByEvent(newAccount, study);
+
+        mockMvc.perform(post("/study/" + study.getEncodingPath() + "/events/" + event.getId() + "/enroll")
+                    .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/" + study.getEncodingPath() + "/events/" + event.getId()));
+
+        Event findEvent = eventRepository.findWithStudyWithEnrollmentsById(event.getId());
+
+        assertThat(findEvent).isNotNull();
+        assertThat(findEvent.getEnrollments()).isEqualTo(1);
+        assertThat(findEvent.getEnrollments().get(0).getAccount()).isEqualTo(findAccount());
+    }
+
     Long getEventIdToLong(String eventId) {
         return Long.parseLong(eventId);
     }
@@ -243,5 +267,14 @@ class EventControllerTest {
         eventForm.setStartDateTime(LocalDateTime.now().plusDays(2));
         eventForm.setEndDateTime(LocalDateTime.now().plusDays(20));
         return eventService.createNewEvent(account, study, eventForm);
+    }
+
+    Account createNewAccount(String nickname) {
+        SignUpForm signUpForm = new SignUpForm();
+        signUpForm.setNickname(nickname);
+        signUpForm.setPassword("123456789");
+        signUpForm.setEmail("aaa@aaa.co.kr");
+
+        return accountService.processNewAccount(signUpForm);
     }
 }

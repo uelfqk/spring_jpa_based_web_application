@@ -109,7 +109,7 @@ class EventFormValidatorTest {
         Method method =
                 initializedPrivateMethod(PRIVATE_METHOD_IS_NOT_VALID_END_ENROLLMENT_DATE_TIME);
 
-        assertThat(getResultWithPrivateMethod(method, eventForm)).isTrue();
+        assertThat(getResultWithPrivateMethod(method, eventForm)).isFalse();
     }
 
     @Test

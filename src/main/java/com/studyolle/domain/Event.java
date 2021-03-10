@@ -92,6 +92,10 @@ public class Event {
         this.endEnrollmentDateTime = endEnrollmentDateTime;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
+
+        if(isFCFSEnrollment()) {
+            nextAccountEnrollEvent();
+        }
     }
 
     public int numberOfRemainSpots() {
@@ -151,17 +155,29 @@ public class Event {
     }
 
     private void nextAccountEnrollEvent() {
-        Enrollment enrollment = enrollments.stream().filter(e -> !e.isAccepted())
-                .findFirst().orElse(null);
+        for(Enrollment enrollment : enrollments) {
+            if (!isEnroll()) {
+                break;
+            }
 
-        if(enrollment == null) {
-            return;
+            enrollment.setAccepted(true);
         }
 
-        enrollment.setAccepted(true);
+//        Enrollment enrollment = enrollments.stream().filter(e -> !e.isAccepted())
+//                .findFirst().orElse(null);
+//
+//        if(enrollment == null) {
+//            return;
+//        }
+//
+//        enrollment.setAccepted(true);
     }
 
     public boolean isFCFSEnrollment() {
-        return eventType == EventType.FCFS && numberOfRemainSpots() != 0;
+        return eventType == EventType.FCFS && isEnroll();
+    }
+
+    private boolean isEnroll() {
+        return numberOfRemainSpots() != 0;
     }
 }

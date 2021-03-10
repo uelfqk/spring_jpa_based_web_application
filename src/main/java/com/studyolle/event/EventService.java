@@ -44,9 +44,6 @@ public class EventService {
         Event event = eventRepository.findWithStudyWithEnrollmentsById(eventId);
         Enrollment enrollment = Enrollment.createBy(event, account);
         event.addEnrollment(enrollment);
-
-
-
         return event;
     }
 

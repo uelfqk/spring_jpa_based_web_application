@@ -118,7 +118,6 @@ public class EventController {
             model.addAttribute("account", account);
             model.addAttribute("study", study);
             model.addAttribute("event", event);
-            System.out.println("!!!!");
             return "event/view";
         }
 
