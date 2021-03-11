@@ -10,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,8 +26,6 @@ public class EventService {
         Event event = Event.createByEvent(account, study, eventForm.getTitle(), eventForm.getDescription(),
                 eventForm.getEndEnrollmentDateTime(), eventForm.getStartDateTime(), eventForm.getEndDateTime(),
                 eventForm.getLimitOfEnrollments(), eventForm.getEventType());
-
-        Enrollment enrollment = Enrollment.createBy(event, account);
 
         return eventRepository.save(event);
     }
@@ -50,6 +50,15 @@ public class EventService {
     public Event disEnrollEvent(Long eventId, Account account) {
         Event event = eventRepository.findWithStudyWithEnrollmentsById(eventId);
         event.disEnrollEvent(account);
+        return event;
+    }
+
+    public Event acceptedEnrollAccount(Long eventId, Long enrollId) {
+        Event event = eventRepository.findWithEnrollmentsById(eventId, enrollId);
+
+        event.getEnrollments().get(0)
+                .acceptedEnrollAccount();
+
         return event;
     }
 }

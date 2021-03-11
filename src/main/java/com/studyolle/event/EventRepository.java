@@ -30,4 +30,14 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "join fetch e.study s " +
             "where s.id = :studyId")
     List<Event> findAllByStudyId(@Param("studyId") Long StudyId);
+
+    @Query("select e from Event e " +
+            "left join fetch e.enrollments em " +
+            "where e.id = :eventId and em.id = :enrollId")
+    Event findWithEnrollmentsById(@Param("eventId") Long eventId, @Param("enrollId") Long enrollId);
+
+    @Query("select e from Event e " +
+            "left join fetch e.enrollments em " +
+            "where e.id = :eventId")
+    Event findWithEnrollmentsById(@Param("eventId") Long eventId);
 }

@@ -52,4 +52,12 @@ public class Enrollment {
 
         return enrollment;
     }
+
+    public void acceptedEnrollAccount() {
+        this.accepted = true;
+    }
+
+    public void rejectedEnrollAccount() {
+        this.accepted = false;
+    }
 }

@@ -6,6 +6,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -57,7 +58,7 @@ public class Event {
     private Integer limitOfEnrollments;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.PERSIST, orphanRemoval = true)
-    private List<Enrollment> enrollments;
+    private List<Enrollment> enrollments = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private EventType eventType;
@@ -129,11 +130,19 @@ public class Event {
     }
 
     public boolean canAccept(Enrollment enrollment) {
-        return true;
+        if(eventType == EventType.FCFS) {
+            return false;
+        }
+
+        return enrollment.isAccepted() == false;
     }
 
     public boolean canReject(Enrollment enrollment) {
-        return false;
+        if(eventType == EventType.FCFS) {
+            return false;
+        }
+
+        return enrollment.isAccepted() == true;
     }
 
     private Long getEnrollmentAccountCount(Long accountId) {

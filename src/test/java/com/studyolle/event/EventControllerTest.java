@@ -219,7 +219,7 @@ class EventControllerTest {
         assertThat(findEvent.getLimitOfEnrollments()).isEqualTo(4);
     }
 
-    @Test @DisplayName("모임 참가하기")
+    @Test @DisplayName("선착순 모임 참가하기")
     @WithAccount("youngbin")
     void enrollEventTest() throws Exception {
         Account newAccount = createNewAccount("newAccount");
@@ -227,6 +227,29 @@ class EventControllerTest {
         Event event = createByEvent(newAccount, study);
 
         mockMvc.perform(post("/study/" + study.getEncodingPath() + "/events/" + event.getId() + "/enroll")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/" + study.getEncodingPath() + "/events/" + event.getId()));
+
+        Event findEvent = eventRepository.findWithStudyWithEnrollmentsById(event.getId());
+
+        assertThat(findEvent).isNotNull();
+        assertThat(findEvent.getEnrollments().size()).isEqualTo(1);
+        assertThat(findEvent.getEnrollments().get(0).getAccount()).isEqualTo(findAccount());
+    }
+
+    @Test @DisplayName("선착순 모임 취소하기")
+    @WithAccount("youngbin")
+    void disEnrollEventTest() throws Exception {
+        Account newAccount = createNewAccount("newAccount");
+        Study study = createByStudy(newAccount);
+        Event event = createByEvent(newAccount, study);
+
+        Account account = findAccount();
+
+        eventService.enrollEvent(event.getId(), account);
+
+        mockMvc.perform(post("/study/" + study.getEncodingPath() + "/events/" + event.getId() +"/disenroll")
                     .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/study/" + study.getEncodingPath() + "/events/" + event.getId()));
@@ -234,8 +257,7 @@ class EventControllerTest {
         Event findEvent = eventRepository.findWithStudyWithEnrollmentsById(event.getId());
 
         assertThat(findEvent).isNotNull();
-        assertThat(findEvent.getEnrollments()).isEqualTo(1);
-        assertThat(findEvent.getEnrollments().get(0).getAccount()).isEqualTo(findAccount());
+        assertThat(findEvent.getEnrollments().size()).isEqualTo(0);
     }
 
     Long getEventIdToLong(String eventId) {

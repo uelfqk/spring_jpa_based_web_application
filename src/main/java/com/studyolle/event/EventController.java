@@ -143,6 +143,22 @@ public class EventController {
         return "redirect:/study/" + event.getStudy().getEncodingPath() + "/events/" + event.getId();
     }
 
+    @GetMapping("/events/{event-id}/enrollments/{enroll-id}/accept")
+    public String acceptEnrollAccount(@CurrentUser Account account,
+                                      @PathVariable String path,
+                                      @PathVariable(value = "event-id") Long eventId,
+                                      @PathVariable(value = "enroll-id") Long enrollId) throws UnsupportedEncodingException {
+
+        Study study = studyRepository.findByPath(path);
+
+//        Event event = eventRepository.findWithStudyWithEnrollmentsById(eventId);
+
+        Event event = eventService.acceptedEnrollAccount(eventId, enrollId);
+
+        System.out.println("!!!!");
+
+        return "redirect:/study/" + study.getEncodingPath() + "/events/" + event.getId();
+    }
     @GetMapping("/events")
     public String showEvents(@CurrentUser Account account, @PathVariable String path, Model model) {
         Study study = studyRepository.findByPath(path);
