@@ -4,6 +4,7 @@ import com.studyolle.account.UserAccount;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.BatchSize;
+import org.yaml.snakeyaml.util.UriEncoder;
 
 import javax.persistence.*;
 import java.io.UnsupportedEncodingException;
@@ -11,7 +12,9 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 //TODO 2021.01.26 50. 스터디 도메인 개발
 
@@ -138,12 +141,11 @@ public class Study {
     //                   -. 해당 스터디가 공개 되었고
     //                   -. 해당 스터디가 종료 되지 않았고
     public boolean isManager(UserAccount userAccount) {
-        for (StudyAccount studyAccount : studyAccounts) {
-            if(studyAccount.isManager(userAccount.getAccount())) {
-                return true;
-            }
-        }
-        return false;
+        return isManager(userAccount.getAccount());
+    }
+
+    public boolean isManager(Account account) {
+        return studyAccounts.stream().anyMatch(sa -> sa.isManager(account));
     }
 
     public Long getStudyMemberCount() {
@@ -220,6 +222,15 @@ public class Study {
     }
 
     public void leaveAccount(Account account) {
-        studyAccounts.removeIf(sa -> sa.getAccount().equals(account));
+        StudyAccount studyAccount = studyAccounts.stream()
+                .filter(sa -> sa.getAccount().equals(account))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
+
+        studyAccounts.remove(studyAccount);
+
+//        studyAccounts.removeIf(sa -> sa.getAccount().equals(account));
     }
+
+//    private Set<StudyAccount> studyAccountSet;
 }

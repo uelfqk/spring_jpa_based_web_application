@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class EventService {
+    private final int ENROLLMENT_SIZE_ONE = 1;
 
     private final EventRepository eventRepository;
 
@@ -56,9 +57,30 @@ public class EventService {
     public Event acceptedEnrollAccount(Long eventId, Long enrollId) {
         Event event = eventRepository.findWithEnrollmentsById(eventId, enrollId);
 
+        if(isNotValidEnrollmentSizeOne(event.getEnrollments().size())) {
+            throw new IllegalStateException("");
+        }
+
         event.getEnrollments().get(0)
                 .acceptedEnrollAccount();
 
         return event;
+    }
+
+    public Event rejectedEnrollAccount(Long eventId, Long enrollId) {
+        Event event = eventRepository.findWithEnrollmentsById(eventId, enrollId);
+
+        if(isNotValidEnrollmentSizeOne(event.getEnrollments().size())) {
+            throw new IllegalStateException("");
+        }
+
+        event.getEnrollments().get(0)
+                .rejectedEnrollAccount();
+
+        return event;
+    }
+
+    private boolean isNotValidEnrollmentSizeOne(int size) {
+        return size != ENROLLMENT_SIZE_ONE;
     }
 }

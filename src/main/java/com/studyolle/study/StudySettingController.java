@@ -42,7 +42,7 @@ public class StudySettingController {
 
     @GetMapping("/description")
     public String showSettings(@CurrentUser Account account, @PathVariable String path, Model model) {
-        Study study = studyService.getStudyToUpdate(account, path);
+        Study study = studyService.getStudyWithManager(account, path);
         model.addAttribute("account", account);
         model.addAttribute("study", study);
         model.addAttribute("studyDescriptionForm", modelMapper.map(study, StudyDescriptionForm.class));
@@ -67,7 +67,7 @@ public class StudySettingController {
 
     @GetMapping("/banner")
     public String viewBannerImage(@CurrentUser Account account, @PathVariable String path, Model model) {
-        Study study = studyService.getStudyToUpdate(account, path);
+        Study study = studyService.getStudyWithManager(account, path);
 
         model.addAttribute("account", account);
         model.addAttribute("study", study);
@@ -192,7 +192,7 @@ public class StudySettingController {
 
     @GetMapping("/study")
     public String showStudy(@CurrentUser Account account, @PathVariable String path, Model model) {
-        Study study = studyService.getStudyToUpdate(account, path);
+        Study study = studyService.getStudyWithManager(account, path);
         model.addAttribute("account", account);
         model.addAttribute("study", study);
         return "study/settings/study";
@@ -201,7 +201,7 @@ public class StudySettingController {
     @PostMapping("/study/publish")
     public String publishStudy(@CurrentUser Account account, @PathVariable String path,
                                RedirectAttributes attributes) throws UnsupportedEncodingException {
-        Study study = studyService.getStudyToUpdate(account, path);
+        Study study = studyService.getStudyWithManager(account, path);
         studyService.publishStudy(study);
         attributes.addFlashAttribute("message", "스터디를 공개하였습니다.");
         return getSettingsStudyReturn(study.getEncodingPath());
@@ -210,7 +210,7 @@ public class StudySettingController {
     @PostMapping("/study/close")
     public String closeStudy(@CurrentUser Account account, @PathVariable String path,
                              RedirectAttributes attributes) throws UnsupportedEncodingException {
-        Study study = studyService.getStudyToUpdate(account, path);
+        Study study = studyService.getStudyWithManager(account, path);
         studyService.closeStudy(study);
         attributes.addFlashAttribute("message", "스터디를 종료하였습니다.");
         return getSettingsStudyReturn(study.getEncodingPath());
@@ -254,7 +254,7 @@ public class StudySettingController {
     public String updateStudyPath(@CurrentUser Account account, @PathVariable String path,
                                   @Valid @ModelAttribute StudyPathForm studyPathForm, Errors errors,
                                   Model model, RedirectAttributes attributes) throws UnsupportedEncodingException {
-        Study study = studyService.getStudyToUpdate(account, path);
+        Study study = studyService.getStudyWithManager(account, path);
 
         if(errors.hasErrors()) {
             model.addAttribute("account", account);
@@ -274,7 +274,7 @@ public class StudySettingController {
                                    @Valid @ModelAttribute StudyTitleForm studyTitleForm, Errors errors,
                                    Model model, RedirectAttributes attributes) throws UnsupportedEncodingException {
 
-        Study study = studyService.getStudyToUpdate(account, path);
+        Study study = studyService.getStudyWithManager(account, path);
 
         if(errors.hasErrors()) {
             model.addAttribute("account", account);
@@ -290,7 +290,7 @@ public class StudySettingController {
 
     @PostMapping("/study/remove")
     public String removeStudy(@CurrentUser Account account, @PathVariable String path) {
-        Study study = studyService.getStudyToUpdate(account, path);
+        Study study = studyService.getStudyWithManager(account, path);
         studyService.removeStudy(study);
         return "redirect:/";
     }
