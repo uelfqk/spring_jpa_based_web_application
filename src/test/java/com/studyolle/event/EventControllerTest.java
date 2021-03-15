@@ -9,11 +9,9 @@ import com.studyolle.domain.Event;
 import com.studyolle.domain.Study;
 import com.studyolle.enums.EventType;
 import com.studyolle.event.form.EventForm;
-import com.studyolle.event.validator.EventFormValidator;
 import com.studyolle.study.StudyRepository;
 import com.studyolle.study.StudyService;
 import com.studyolle.study.form.StudyForm;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,15 +20,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.Errors;
 
-import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -247,7 +240,7 @@ class EventControllerTest {
 
         Account account = findAccount();
 
-        eventService.enrollEvent(event.getId(), account);
+        eventService.enrollmentEvent(event.getId(), account);
 
         mockMvc.perform(post("/study/" + study.getEncodingPath() + "/events/" + event.getId() +"/disenroll")
                     .with(csrf()))

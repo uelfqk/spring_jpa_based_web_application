@@ -60,4 +60,12 @@ public class Enrollment {
     public void rejectedEnrollAccount() {
         this.accepted = false;
     }
+
+    public void checkIn() {
+        this.attended = true;
+    }
+
+    public void cancelCheckIn() {
+        this.attended = false;
+    }
 }

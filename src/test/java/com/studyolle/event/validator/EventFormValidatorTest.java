@@ -115,7 +115,7 @@ class EventFormValidatorTest {
     @Test
     void isNotValidEndEnrollmentDateTimeFailWithIsBeforeLocalDateTimeNowDatetimeTest() throws Exception {
         EventForm eventForm = createByEventForm(
-                createEndEnrollmentDateTimeByDay(4),
+                createEndEnrollmentDateTimeByDay(7),
                 createStartDateTimeByDay(5),
                 createEndDateTimeByDay(6)
         );

@@ -106,12 +106,12 @@ public class Event {
 
     public boolean isEnrollableFor(UserAccount userAccount) {
         Account account = userAccount.getAccount();
-        return getEnrollmentAccountCount(account.getId()) == 0;
+        return getEnrollmentAccountCount(account) == 0;
     }
 
-    public boolean isDisenrollableFor(UserAccount userAccount) {
+    public boolean isDisEnrollableFor(UserAccount userAccount) {
         Account account = userAccount.getAccount();
-        return getEnrollmentAccountCount(account.getId()) > 0;
+        return getEnrollmentAccountCount(account) > 0;
     }
 
     public boolean isAttended(UserAccount userAccount) {
@@ -147,6 +147,11 @@ public class Event {
 
     private Long getEnrollmentAccountCount(Long accountId) {
         return enrollments.stream().filter(e -> e.getAccount().getId() == accountId)
+                .count();
+    }
+
+    private Long getEnrollmentAccountCount(Account account) {
+        return enrollments.stream().filter(e -> e.getAccount().equals(account))
                 .count();
     }
 

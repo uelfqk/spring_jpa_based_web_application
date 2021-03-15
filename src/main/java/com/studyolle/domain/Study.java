@@ -225,12 +225,8 @@ public class Study {
         StudyAccount studyAccount = studyAccounts.stream()
                 .filter(sa -> sa.getAccount().equals(account))
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
 
         studyAccounts.remove(studyAccount);
-
-//        studyAccounts.removeIf(sa -> sa.getAccount().equals(account));
     }
-
-//    private Set<StudyAccount> studyAccountSet;
 }
