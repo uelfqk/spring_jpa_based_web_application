@@ -13,8 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class EventService {
-    private final int ENROLLMENT_SIZE_ONE = 1;
-
     private final EventRepository eventRepository;
     private final EnrollmentRepository enrollmentRepository;
 
@@ -39,64 +37,37 @@ public class EventService {
     public void enrollmentEvent(Event event, Account account) {
         if(!enrollmentRepository.existsByAccountAndEvent(account, event)) {
             Enrollment enrollment = Enrollment.createBy(event, account);
-            event.addEnrollment(enrollment);
         }
     }
 
     public Event disEnrollmentEvent(Long eventId, Account account) {
-
-
         Event event = eventRepository.findWithStudyWithEnrollmentsById(eventId);
         event.disEnrollEvent(account);
         return event;
     }
 
-    public Event acceptedEnrollAccount(Long eventId, Long enrollId) {
-        Event event = eventRepository.findWithEnrollmentsById(eventId, enrollId);
-
-        if(isNotValidEnrollmentSizeOne(event.getEnrollments().size())) {
-            throw new IllegalStateException("");
-        }
-
-        event.getEnrollments().get(0)
-                .acceptedEnrollAccount();
-
-        return event;
+    public void disEnrollmentEvent(Event event, Account account) {
+        Enrollment enrollment = enrollmentRepository.findByEventAndAccount(event, account);
+        event.disEnrollEvent(enrollment);
     }
 
-    public Event rejectedEnrollAccount(Long eventId, Long enrollId) {
-        Event event = eventRepository.findWithEnrollmentsById(eventId, enrollId);
-
-        getEnrollmentOne(event).rejectedEnrollAccount();
-
-        return event;
+    public void acceptedEnrollAccount(Event event, Long enrollmentId) {
+        Enrollment enrollment = enrollmentRepository.findByEventAndId(event, enrollmentId);
+        enrollment.acceptedEnrollAccount();
     }
 
-    private boolean isNotValidEnrollmentSizeOne(int size) {
-        return size != ENROLLMENT_SIZE_ONE;
+    public void rejectedEnrollAccount(Event event, Long enrollmentId) {
+        Enrollment enrollment = enrollmentRepository.findByEventAndId(event, enrollmentId);
+        enrollment.rejectedEnrollAccount();
     }
 
-    private Enrollment getEnrollmentOne(Event event) {
-        if(isNotValidEnrollmentSizeOne(event.getEnrollments().size())) {
-            throw new IllegalStateException("");
-        }
-
-        return event.getEnrollments().get(0);
+    public void checkInEvent(Event event, Long enrollmentId) {
+        Enrollment enrollment = enrollmentRepository.findByEventAndId(event, enrollmentId);
+        enrollment.checkIn();
     }
 
-    public Event checkInEvent(Long eventId, Long enrollId) {
-        Event event = eventRepository.findWithEnrollmentsById(eventId, enrollId);
-
-        getEnrollmentOne(event).checkIn();
-
-        return event;
-    }
-
-    public Event cancelCheckInEvent(Long eventId, Long enrollId) {
-        Event event = eventRepository.findWithEnrollmentsById(eventId, enrollId);
-
-        getEnrollmentOne(event).cancelCheckIn();
-
-        return event;
+    public void cancelCheckInEvent(Event event, Long enrollmentId) {
+        Enrollment enrollment = enrollmentRepository.findByEventAndId(event, enrollmentId);
+        enrollment.cancelCheckIn();
     }
 }

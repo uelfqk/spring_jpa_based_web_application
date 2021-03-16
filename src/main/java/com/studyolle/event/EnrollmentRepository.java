@@ -10,4 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     boolean existsByAccountAndEvent(Account account, Event event);
+
+    Enrollment findByEventAndAccount(Event event, Account account);
+
+    Enrollment findByEventAndId(Event event, Long enrollmentId);
 }

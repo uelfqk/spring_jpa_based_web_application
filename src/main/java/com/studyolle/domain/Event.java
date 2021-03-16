@@ -121,33 +121,41 @@ public class Event {
                 .count() > 0;
     }
 
-    public void addEnrollment(Enrollment enrollment) {
-        this.enrollments.add(enrollment);
-    }
-
     public boolean isLimitOverEnroll() {
         return enrollments.size() >= limitOfEnrollments;
     }
 
     public boolean canAccept(Enrollment enrollment) {
-        if(eventType == EventType.FCFS) {
-            return false;
-        }
-
-        return enrollment.isAccepted() == false;
+        // TODO 2021.03.15 모임 참가 신청
+        //                 모임 모집 방식이 관리자 확인
+        //                 && 모임 신청 취소한 객체가 현재 모임 컬랙션에 포함
+        //                 && ! 모임에 체크인
+        //                 && ! 모임 신청 객체가 참가 수락
+        return this.eventType == EventType.CONFIRMATIVE
+                && this.enrollments.contains(enrollment)
+                && !enrollment.isAttended()
+                && !enrollment.isAccepted();
     }
 
     public boolean canReject(Enrollment enrollment) {
-        if(eventType == EventType.FCFS) {
-            return false;
-        }
-
-        return enrollment.isAccepted() == true;
+        // TODO 2021.03.15 모임 참가 취소
+        //                 모임 모집 방식이 관리자 확인
+        //                 && 모임 신청 취소한 객체가 현재 모임 컬랙션에 포함
+        //                 && ! 모임에 체크인
+        //                 && 모임 신청 객체가 참가 수락
+        return this.eventType == EventType.CONFIRMATIVE
+                && this.enrollments.contains(enrollment)
+                && !enrollment.isAttended()
+                && enrollment.isAccepted();
     }
 
-    private Long getEnrollmentAccountCount(Long accountId) {
-        return enrollments.stream().filter(e -> e.getAccount().getId() == accountId)
-                .count();
+    private boolean isAbleToAcceptWaitingEnrollment() {
+        return this.eventType == EventType.FCFS
+                && this.limitOfEnrollments > this.getNumberOfAcceptedEnrollments();
+    }
+
+    public long getNumberOfAcceptedEnrollments() {
+        return this.enrollments.stream().filter(en -> en.isAccepted()).count();
     }
 
     private Long getEnrollmentAccountCount(Account account) {
@@ -165,6 +173,39 @@ public class Event {
 
         if(isFCFSEnrollment()) {
             nextAccountEnrollEvent();
+        }
+    }
+
+    public void disEnrollEvent(Enrollment enrollment) {
+        enrollments.remove(enrollment);
+        acceptNextAccountEnrollEvent();
+    }
+
+    private Enrollment getFirstWaitingEnrollment() {
+        for(Enrollment enrollment : enrollments) {
+            return getFirstWaitingEnrollment(enrollment);
+        }
+
+        return null;
+    }
+
+    private Enrollment getFirstWaitingEnrollment(Enrollment enrollment) {
+        if(enrollment.isAccepted()) {
+            return enrollment;
+        }
+
+        return null;
+    }
+
+    private void acceptNextAccountEnrollEvent() {
+        if(this.isAbleToAcceptWaitingEnrollment()) {
+            acceptNextAccountEnrollEvent(this.getFirstWaitingEnrollment());
+        }
+    }
+
+    private void acceptNextAccountEnrollEvent(Enrollment enrollment) {
+        if(enrollment != null) {
+            enrollment.setAccepted(true);
         }
     }
 

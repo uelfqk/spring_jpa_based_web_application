@@ -46,6 +46,8 @@ public class Enrollment {
         enrollment.setAccount(account);
         enrollment.setEnrolledAt(LocalDateTime.now());
 
+        event.getEnrollments().add(enrollment);
+
         if(event.isFCFSEnrollment()) {
             enrollment.setAccepted(true);
         }

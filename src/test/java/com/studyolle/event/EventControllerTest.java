@@ -240,7 +240,7 @@ class EventControllerTest {
 
         Account account = findAccount();
 
-        eventService.enrollmentEvent(event.getId(), account);
+        eventService.enrollmentEvent(event, account);
 
         mockMvc.perform(post("/study/" + study.getEncodingPath() + "/events/" + event.getId() +"/disenroll")
                     .with(csrf()))
