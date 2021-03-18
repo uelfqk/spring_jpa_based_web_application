@@ -51,6 +51,9 @@ class EventControllerTest {
     EventRepository eventRepository;
 
     @Autowired
+    EnrollmentRepository enrollmentRepository;
+
+    @Autowired
     MockMvc mockMvc;
 
     @AfterEach
@@ -251,6 +254,22 @@ class EventControllerTest {
 
         assertThat(findEvent).isNotNull();
         assertThat(findEvent.getEnrollments().size()).isEqualTo(0);
+    }
+
+    @Test @DisplayName("모임 수락")
+    @WithAccount("youngbin")
+    void acceptEventTest() throws Exception {
+        Account newAccount = createNewAccount("newAccount");
+        Study study = createByStudy(newAccount);
+        Event event = createByEvent(newAccount, study);
+
+        Account account = findAccount();
+
+        eventService.enrollmentEvent(event, account);
+
+        mockMvc.perform(get("/study/" + study.getEncodingPath() + "/events/" + event.getId() + "/accept"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/" + study.getEncodingPath() + "/events/" + event.getId()));
     }
 
     Long getEventIdToLong(String eventId) {
