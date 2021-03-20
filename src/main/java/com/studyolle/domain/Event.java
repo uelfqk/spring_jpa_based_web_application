@@ -80,6 +80,11 @@ public class Event {
         return event;
     }
 
+    public void addEnrollment(Enrollment enrollment) {
+        this.enrollments.add(enrollment);
+        enrollment.setEvent(this);
+    }
+
     public static Event defaultEvent() {
         return new Event();
     }

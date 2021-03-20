@@ -5,6 +5,7 @@ import com.studyolle.account.AccountRepository;
 import com.studyolle.account.AccountService;
 import com.studyolle.account.form.SignUpForm;
 import com.studyolle.domain.Account;
+import com.studyolle.domain.Enrollment;
 import com.studyolle.domain.Event;
 import com.studyolle.domain.Study;
 import com.studyolle.enums.EventType;
@@ -20,7 +21,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.*;
@@ -52,6 +55,9 @@ class EventControllerTest {
 
     @Autowired
     EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    EntityManager em;
 
     @Autowired
     MockMvc mockMvc;
@@ -142,7 +148,7 @@ class EventControllerTest {
     void showEventTest() throws Exception {
         Account account = findAccount();
         Study study = createByStudy(account);
-        Event event = createByEvent(account, study);
+        Event event = createByEvent(account, study, EventType.FCFS);
         MvcResult result = mockMvc.perform(get("/study/study/events/" + event.getId()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("event/view"))
@@ -161,7 +167,7 @@ class EventControllerTest {
     void editViewEventTest() throws Exception {
         Account account = findAccount();
         Study study = createByStudy(account);
-        Event event = createByEvent(account, study);
+        Event event = createByEvent(account, study, EventType.FCFS);
 
         MvcResult result = mockMvc.perform(get("/study/study/events/" + event.getId() + "/edit"))
                 .andExpect(status().isOk())
@@ -189,7 +195,7 @@ class EventControllerTest {
     void editEventSuccessTest() throws Exception {
         Account account = findAccount();
         Study study = createByStudy(account);
-        Event event = createByEvent(account, study);
+        Event event = createByEvent(account, study, EventType.FCFS);
 
         MvcResult result = mockMvc.perform(post("/study/study/events/" + event.getId() + "/edit")
                 .param("title", "newEventTitle")
@@ -217,10 +223,12 @@ class EventControllerTest {
 
     @Test @DisplayName("선착순 모임 참가하기")
     @WithAccount("youngbin")
-    void enrollEventTest() throws Exception {
+    void enrollmentEventTest() throws Exception {
         Account newAccount = createNewAccount("newAccount");
         Study study = createByStudy(newAccount);
-        Event event = createByEvent(newAccount, study);
+        Event event = createByEvent(newAccount, study, EventType.FCFS);
+
+        System.out.println("/study/" + study.getEncodingPath() + "/events/" + event.getId() + "/enroll");
 
         mockMvc.perform(post("/study/" + study.getEncodingPath() + "/events/" + event.getId() + "/enroll")
                 .with(csrf()))
@@ -236,10 +244,11 @@ class EventControllerTest {
 
     @Test @DisplayName("선착순 모임 취소하기")
     @WithAccount("youngbin")
-    void disEnrollEventTest() throws Exception {
+    @Transactional
+    void disEnrollmentEventTest() throws Exception {
         Account newAccount = createNewAccount("newAccount");
         Study study = createByStudy(newAccount);
-        Event event = createByEvent(newAccount, study);
+        Event event = createByEvent(newAccount, study, EventType.FCFS);
 
         Account account = findAccount();
 
@@ -256,20 +265,62 @@ class EventControllerTest {
         assertThat(findEvent.getEnrollments().size()).isEqualTo(0);
     }
 
-    @Test @DisplayName("모임 수락")
+    @Test @DisplayName("모임 참가 - 관리자 확인 - 수락")
     @WithAccount("youngbin")
+    @Transactional
     void acceptEventTest() throws Exception {
+        Account account = findAccount("youngbin");
+
+        Study study = createByStudy(account);
+        Event event = createByEvent(account, study, EventType.CONFIRMATIVE);
+
         Account newAccount = createNewAccount("newAccount");
-        Study study = createByStudy(newAccount);
-        Event event = createByEvent(newAccount, study);
 
-        Account account = findAccount();
+        eventService.enrollmentEvent(event, newAccount);
 
-        eventService.enrollmentEvent(event, account);
+        Enrollment enrollment = enrollmentRepository.findByEventAndAccount(event, newAccount);
 
-        mockMvc.perform(get("/study/" + study.getEncodingPath() + "/events/" + event.getId() + "/accept"))
+        mockMvc.perform(get("/study/" + study.getEncodingPath() + "/events/" + event.getId() + "/enrollments/" + enrollment.getId() + "/accept"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/study/" + study.getEncodingPath() + "/events/" + event.getId()));
+
+        em.flush();
+        em.clear();
+
+        Enrollment findEnrollment = enrollmentRepository.findByEventAndId(event, enrollment.getId());
+
+        assertThat(findEnrollment).isNotNull();
+        assertThat(findEnrollment.isAccepted()).isTrue();
+    }
+
+    @Test @DisplayName("모임 참가 - 관리자 확인 - 취소")
+    @WithAccount("youngbin")
+    @Transactional
+    void rejectedEnrollmentAccountTest() throws Exception {
+        Account account = findAccount("youngbin");
+
+        Study study = createByStudy(account);
+        Event event = createByEvent(account, study, EventType.CONFIRMATIVE);
+
+        Account newAccount = createNewAccount("newAccount");
+
+        eventService.enrollmentEvent(event, newAccount);
+
+        Enrollment enrollment = enrollmentRepository.findByEventAndAccount(event, newAccount);
+
+        eventService.acceptedEnrollAccount(event, enrollment.getId());
+
+        mockMvc.perform(get("/study/" + study.getEncodingPath() + "/events/" + event.getId() + "/enrollments/" + enrollment.getId() + "/reject"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/" + study.getEncodingPath() + "/events/" + event.getId()));
+
+        em.flush();
+        em.clear();
+
+        Enrollment findEnrollment = enrollmentRepository.findByEventAndAccount(event, newAccount);
+
+        assertThat(findEnrollment.isAccepted()).isFalse();
+
     }
 
     Long getEventIdToLong(String eventId) {
@@ -278,6 +329,10 @@ class EventControllerTest {
 
     Account findAccount() {
         return accountRepository.findByNickname("youngbin");
+    }
+
+    Account findAccount(String username) {
+        return accountRepository.findByNickname(username);
     }
 
     Study createByStudy(Account account) {
@@ -291,12 +346,12 @@ class EventControllerTest {
         return studyService.createNewStudy(account, studyForm);
     }
 
-    Event createByEvent(Account account, Study study) {
+    Event createByEvent(Account account, Study study, EventType eventType) {
         EventForm eventForm = new EventForm();
         eventForm.setTitle("eventTitle");
         eventForm.setDescription("eventDescription");
         eventForm.setLimitOfEnrollments(2);
-        eventForm.setEventType(EventType.FCFS);
+        eventForm.setEventType(eventType);
         eventForm.setEndEnrollmentDateTime(LocalDateTime.now().plusDays(1));
         eventForm.setStartDateTime(LocalDateTime.now().plusDays(2));
         eventForm.setEndDateTime(LocalDateTime.now().plusDays(20));

@@ -55,6 +55,13 @@ public class Enrollment {
         return enrollment;
     }
 
+    public static Enrollment createBy(Account account) {
+        Enrollment enrollment = new Enrollment();
+        enrollment.setAccount(account);
+        enrollment.setEnrolledAt(LocalDateTime.now());
+        return enrollment;
+    }
+
     public void acceptedEnrollAccount() {
         this.accepted = true;
     }

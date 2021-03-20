@@ -36,7 +36,9 @@ public class EventService {
 
     public void enrollmentEvent(Event event, Account account) {
         if(!enrollmentRepository.existsByAccountAndEvent(account, event)) {
-            Enrollment enrollment = Enrollment.createBy(event, account);
+            Enrollment enrollment = Enrollment.createBy(account);
+            event.addEnrollment(enrollment);
+//            enrollmentRepository.save(enrollment);
         }
     }
 
